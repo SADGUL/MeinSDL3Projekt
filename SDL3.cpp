@@ -45,9 +45,7 @@ void PrintTriangle(tTriangle t) {
     printf("P2: (%.2f, %.2f)\n", t.p2.x, t.p2.y);
     printf("P3: (%.2f, %.2f)\n", t.p3.x, t.p3.y);
 }
-void MovePoint(tPoint* p1, tPoint p2) {
-    *p1 += p2;
-}
+
 void RotatePoint(float* cx, float* cy, float angle, float ox, float oy) {
     // Translate point so that pivot (ox, oy) is at the origin
     float x = *cx - ox;
@@ -69,25 +67,13 @@ void RotateTriangle(tTriangle* t, float angle,tPoint originPos) {
     RotatePoint(&t->p3.x, &t->p3.y, angle, originPos.x, originPos.y);
 }
 
-// Draw triangle from three points
-void drawTriangle(SDL_Renderer* renderer,
-    tPoint p1, tPoint p2, tPoint p3,Stickman s) {
-    SDL_RenderLine(renderer, s.x - p1.x, s.y + p1.y, s.x + p2.x, s.y + p2.y);
-    SDL_RenderLine(renderer, s.x + p2.x, s.y + p2.y, s.x + p3.x, s.y + p3.y);
-    SDL_RenderLine(renderer, s.x + p3.x, s.y + p3.y, s.x + p1.x, s.y + p1.y);
-}
 void drawTriangle(SDL_Renderer* renderer,
     tTriangle t,Stickman s) {
     SDL_RenderLine(renderer, s.x + t.p1.x, s.y + t.p1.y, s.x + t.p2.x, s.y + t.p2.y);
     SDL_RenderLine(renderer, s.x + t.p2.x, s.y + t.p2.y, s.x + t.p3.x, s.y + t.p3.y);
     SDL_RenderLine(renderer, s.x + t.p3.x, s.y + t.p3.y, s.x + t.p1.x, s.y + t.p1.y);
 }
-void drawTriangleStartPos(SDL_Renderer* renderer,
-    tTriangle t) {
-    SDL_RenderLine(renderer, t.p1.x, t.p1.y, t.p2.x, t.p2.y);
-    SDL_RenderLine(renderer, t.p2.x, t.p2.y, t.p3.x, t.p3.y);
-    SDL_RenderLine(renderer, t.p3.x, t.p3.y, t.p1.x, t.p1.y);
-}
+
 void drawStickman(SDL_Renderer* renderer, Stickman s) {
 	tPoint origin = { s.x,s.y };
 	float armLen = 50;
