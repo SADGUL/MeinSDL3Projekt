@@ -7,7 +7,7 @@
 #define __PI 3.14159265f
 
 typedef struct {
-    float x, y;      // Position of body center
+    float x, y,z;      // Position of body center
     float angle1,angle2;     // Animation angle
 } Stickman;
 struct tPoint{
@@ -18,6 +18,7 @@ struct tPoint{
 		return *this;
 	}
 } ;
+
 struct tTriangle {
 	tPoint p1, p2, p3;
     tTriangle operator+=(const tPoint offset) {
@@ -40,6 +41,22 @@ struct tTriangle {
     }
     
 } ;
+class TBodypart
+{
+private:
+    tPoint p[4];
+public:
+	TBodypart() {
+    this->p[0].x= }
+    TBodypart(tPoint p1, tPoint p2, tPoint p3, tPoint p4) {
+        p[0] = p1; p[1] = p2; p[2] = p3; p[3] = p4;
+    }
+    void Draw(SDL_Renderer* renderer, Stickman s) {
+        for (int i = 0; i < 4; i++) {
+            SDL_RenderLine(renderer, s.x + p[i].x, s.y + p[i].y, s.x + p[(i + 1) % 4].x, s.y + p[(i + 1) % 4].y);
+        }
+	}
+};
 void PrintTriangle(tTriangle t) {
     printf("P1: (%.2f, %.2f)\n", t.p1.x, t.p1.y);
     printf("P2: (%.2f, %.2f)\n", t.p2.x, t.p2.y);
