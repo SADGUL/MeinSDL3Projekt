@@ -466,17 +466,23 @@ int main() {
         float mouseY = 0;  //mouseclick y coordinates
         int selectedRow = 0;    //current selectedRow
         int selectedCol = 0;    //current selectedCol
-        int a = selectedRow;   //selectedRow the click before
-        int b = selectedCol;   //selectedCol the click before
+
+        // 1. DELETE 'a' and 'b'. Add a newClick flag instead:
+        bool newClick = false;
+
         vector <Moegliches_Feld> Vector_Moegliche_felder;
-
         bool piece_moved = false;
-
 
         while (true) {
             // handle events
-            while (SDL_PollEvent(&event)) {    //Holt Event und speichert in event (0 = Kein Event in Warteschlange)
-                result = AppEvent(appstate, &event, &mouseX, &mouseY, &selectedRow, &selectedCol, &Game_Layout, &WindowConfigs, &Button_Texture);    // Events (auch Mausklick)
+            while (SDL_PollEvent(&event)) {
+
+                // 2. DETECT the physical click here and set the flag
+                if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT) {
+                    newClick = true;
+                }
+
+                result = AppEvent(appstate, &event, &mouseX, &mouseY, &selectedRow, &selectedCol, &Game_Layout, &WindowConfigs, &Button_Texture);
                 switch (result) {
                 case SDL_APP_SUCCESS:
                     AppQuit(appstate, result);
@@ -490,12 +496,8 @@ int main() {
                 }
             }
 
-
-
-
-
-            // If left mouse click on different field: 
-            if (a != selectedRow || b != selectedCol && !Spielfeld.schachmatt) {
+            // 3. ONLY execute the game logic if a fresh click happened
+            if (newClick && !Spielfeld.schachmatt) {
                 if (Button_Texture.normal_move && !Button_Texture.split_move && !Button_Texture.merge_move) {
                     Logik_normal(selectedCol, selectedRow, Spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
                 }
@@ -516,9 +518,6 @@ int main() {
                 cout << "Ausgewaehlte Reihe: " << selectedRow << endl;
                 cout << "Ausgewaehlte Spalte: " << selectedCol << endl;
 
-                a = selectedRow;
-                b = selectedCol;
-
                 if (Spielfeld.piece_selected) {
                     Spielfeld.Felder[Spielfeld.selected_piece_s - 1][Spielfeld.selected_piece_z - 1]->Set_Moegliche_Felder(Spielfeld);
                     Vector_Moegliche_felder = Spielfeld.Felder[Spielfeld.selected_piece_s - 1][Spielfeld.selected_piece_z - 1]->Get_Moegliche_Felder();
@@ -526,17 +525,18 @@ int main() {
                 else {
                     Vector_Moegliche_felder.clear();
                 }
+
+                // 4. RESET the flag so we don't process the same click again!
+                newClick = false;
             }
 
-            //Das hat doch selben Effekt wie vector.clear() 
+            // (Render frame as normal below)
             if (Spielfeld.piece_selected) {
                 AppIterate(appstate, &WindowConfigs, &Game_Layout, &Button_Texture, Spielfeld, Vector_Moegliche_felder);
             }
             else {
                 AppIterate(appstate, &WindowConfigs, &Game_Layout, &Button_Texture, Spielfeld, {});
             }
-
-
         }
     }
 

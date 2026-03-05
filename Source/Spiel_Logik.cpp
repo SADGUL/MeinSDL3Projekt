@@ -12,15 +12,24 @@ void Logik_normal(int s, int z, Brett& spielfeld, vector <Bauer>& bauern, vector
 	vector <Moegliches_Feld> moegliche_felder;
 	if (!spielfeld.piece_selected) {
 		if (spielfeld.Felder[s - 1][z - 1] != nullptr) {
-			if (spielfeld.Felder[s - 1][z - 1]->Get_Farbe() == spielfeld.whites_turn)
+			if (spielfeld.Felder[s - 1][z - 1]->Get_Farbe() == spielfeld.whites_turn){
 				spielfeld.piece_selected = true;
 				spielfeld.selected_piece_s = s;
 				spielfeld.selected_piece_z = z;
 				cout << spielfeld.Felder[s - 1][z - 1]->Get_Name() << " gewaehlt" << endl;
+			}
 		}
 	}
 	else {
-		
+		if (spielfeld.Felder[s - 1][z - 1] != nullptr &&
+			spielfeld.Felder[s - 1][z - 1]->Get_Farbe() == spielfeld.whites_turn) {
+
+			// Switch the selection to the new piece directly!
+			spielfeld.selected_piece_s = s;
+			spielfeld.selected_piece_z = z;
+			cout << "Auswahl gewechselt zu: " << spielfeld.Felder[s - 1][z - 1]->Get_Name() << endl;
+			return; // We switched pieces, so stop executing the rest of the move logic!
+		}
 		spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Set_Moegliche_Felder(spielfeld);
 
 		moegliche_felder = spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Get_Moegliche_Felder();
@@ -241,29 +250,53 @@ void Ziehen_Ins_Ungewisse(float p,int sa, int za, int s, int z, Brett& spielfeld
 }
 
 void Logik_Split(int s, int z, Brett& spielfeld, vector <Bauer>& bauern, vector <Springer>& springer, vector <Laeufer>& laeufer, vector <Turm>& tuerme, vector <Dame>& damen, vector <Koenig>& koenige) {
-	//, vector <Bauer>& bauern, vector <Springer>& springer, vector <Laeufer>& laeufer, vector <Turm>& tuerme, vector <Dame>& damen, vector <Koenig>& koenige
 	Check_for_Mate(spielfeld);
 	if (spielfeld.schachmatt) {
 		return;
 	}
 
-	//int spalte_ziel = s;
-	//int zeiel_ziel = z;
 	vector <Moegliches_Feld> moegliche_felder;
+
+	// Phase 1: Gar keine Figur ausgewählt -> Initiale Auswahl
 	if (!spielfeld.piece_selected) {
 		if (spielfeld.Felder[s - 1][z - 1] != nullptr) {
-			if (spielfeld.Felder[s - 1][z - 1]->Get_Farbe() == spielfeld.whites_turn && spielfeld.Felder[s - 1][z - 1]->Get_Name() != 'b') // Bauer darf keine Quantenzuege ausfuehren
+			if (spielfeld.Felder[s - 1][z - 1]->Get_Farbe() == spielfeld.whites_turn && spielfeld.Felder[s - 1][z - 1]->Get_Name() != 'b') { // Bauer darf keine Quantenzuege ausfuehren
 				if (spielfeld.Felder[s - 1][z - 1]->Get_Gezogen() || spielfeld.Felder[s - 1][z - 1]->Get_Name() != 'K') {
-					//unbewegter Koenige kein Qunatenzug, da sonst Quanten_Rochade -> nicht moeglich
+					// unbewegter Koenig kein Quantenzug, da sonst Quanten_Rochade -> nicht moeglich
 					spielfeld.piece_selected = true;
 					spielfeld.selected_piece_s = s;
 					spielfeld.selected_piece_z = z;
 					cout << spielfeld.Felder[s - 1][z - 1]->Get_Name() << " gewaehlt" << endl;
 				}
+			}
 		}
 	}
-	else if (spielfeld.piece_selected && !spielfeld.first_field_selected){
-		
+
+	// Phase 2: INTERCEPTOR -> Figur wechseln, wenn auf eine andere EIGENE Figur geklickt wird
+	else if (spielfeld.Felder[s - 1][z - 1] != nullptr &&
+		spielfeld.Felder[s - 1][z - 1]->Get_Farbe() == spielfeld.whites_turn &&
+		!(s == spielfeld.selected_piece_s && z == spielfeld.selected_piece_z)) {
+
+		if (spielfeld.Felder[s - 1][z - 1]->Get_Name() != 'b') {
+			if (spielfeld.Felder[s - 1][z - 1]->Get_Gezogen() || spielfeld.Felder[s - 1][z - 1]->Get_Name() != 'K') {
+
+				// Figur direkt wechseln
+				spielfeld.selected_piece_s = s;
+				spielfeld.selected_piece_z = z;
+
+				// Split-Vorgang zurücksetzen, falls schon ein Ziel gewählt war
+				spielfeld.first_field_selected = false;
+				spielfeld.second_field_selected = false;
+
+				cout << "Auswahl gewechselt zu: " << spielfeld.Felder[s - 1][z - 1]->Get_Name() << endl;
+				return; // Klick abfangen und Funktion beenden
+			}
+		}
+	}
+
+	// Phase 3: Erstes Zielfeld auswählen
+	else if (spielfeld.piece_selected && !spielfeld.first_field_selected) {
+
 		spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Set_Moegliche_Felder(spielfeld);
 
 		moegliche_felder = spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Get_Moegliche_Felder();
@@ -273,16 +306,20 @@ void Logik_Split(int s, int z, Brett& spielfeld, vector <Bauer>& bauern, vector 
 				spielfeld.first_field_z = z;
 				spielfeld.first_field_selected = true;
 				spielfeld.piece_selected = true;
-				cout << "Erste Feld gewaehlt" << endl;
+				cout << "Erstes Feld gewaehlt" << endl;
 				break;
 			}
-
 		}
+
+		// Wenn kein gültiges Zielfeld geklickt wurde -> Abwählen
 		if (!spielfeld.first_field_selected) {
 			spielfeld.piece_selected = false;
 		}
 	}
-	else if (spielfeld.piece_selected && spielfeld.first_field_selected){
+
+	// Phase 4: Zweites Zielfeld auswählen und den Move triggern
+	else if (spielfeld.piece_selected && spielfeld.first_field_selected) {
+
 		spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Set_Moegliche_Felder(spielfeld);
 
 		moegliche_felder = spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Get_Moegliche_Felder();
@@ -290,23 +327,18 @@ void Logik_Split(int s, int z, Brett& spielfeld, vector <Bauer>& bauern, vector 
 			if (moegliche_felder[i].spalte == s && moegliche_felder[i].zeile == z && moegliche_felder[i].wahrscheinlichkeit == 1.0) {
 				spielfeld.second_field_s = s;
 				spielfeld.second_field_z = z;
-				spielfeld.first_field_selected = true;
 				spielfeld.second_field_selected = true;
 				cout << "Zweites Feld gewaehlt" << endl;
-				
-				Split_Move( spielfeld,bauern, springer, laeufer, tuerme, damen, koenige);
 
+				Split_Move(spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
 				break;
 			}
-
 		}
-		
-			spielfeld.piece_selected = false;
-			spielfeld.first_field_selected = false;
-			spielfeld.second_field_selected = false;
-			
-			
-		
+
+		// Egal ob der Move erfolgreich war oder ins Leere geklickt wurde, die Auswahl wird zurückgesetzt
+		spielfeld.piece_selected = false;
+		spielfeld.first_field_selected = false;
+		spielfeld.second_field_selected = false;
 	}
 }
 
@@ -393,7 +425,7 @@ void Logik_Merge(int s, int z, Brett& spielfeld) {
 	vector <Moegliches_Feld> moegliche_felder_2;
 	if (!spielfeld.first_piece_selected && !spielfeld.second_piece_selected) { // erster Click
 		if (spielfeld.Felder[s - 1][z - 1] != nullptr) {
-			if (spielfeld.Felder[s - 1][z - 1]->Get_Farbe() == spielfeld.whites_turn && spielfeld.Felder[s - 1][z - 1]->Get_Wahrscheinlichkeit() < 1) // // Figur muss aufgeteilt sein
+			if (spielfeld.Felder[s - 1][z - 1]->Get_Farbe() == spielfeld.whites_turn && spielfeld.Felder[s - 1][z - 1]->Get_Wahrscheinlichkeit() < 1) { // // Figur muss aufgeteilt sein
 				spielfeld.first_piece_selected = true;
 				spielfeld.first_piece_s = s;
 				spielfeld.first_piece_z = z;
@@ -401,6 +433,7 @@ void Logik_Merge(int s, int z, Brett& spielfeld) {
 				spielfeld.piece_selected = true;
 				spielfeld.selected_piece_s = s;
 				spielfeld.selected_piece_z = z;
+			}
 		}
 	}
 	else if (spielfeld.first_piece_selected && !spielfeld.second_piece_selected) { // zweiter Click
