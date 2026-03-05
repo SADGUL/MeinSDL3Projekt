@@ -77,11 +77,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>P:\LIBS\SDL-release-3.2.14\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>P:\LIBS\SDL3-3.2.14\include;C:\Users\SG\Desktop\SDL3\SDL3_image-3.4.0\include;C:\Users\SG\Desktop\SDL3\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\SG\Desktop\SDL3\SDL3_image-3.4.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL3_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -92,11 +94,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>P:\LIBS\SDL-release-3.2.14\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>P:\LIBS\SDL3-3.2.14\include;C:\Users\SG\Desktop\SDL3\SDL3_image-3.4.0\include;C:\Users\SG\Desktop\SDL3\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\SG\Desktop\SDL3\SDL3_image-3.4.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL3_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -105,11 +109,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>P:\LIBS\SDL-release-3.2.14\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>P:\LIBS\SDL3-3.2.14\include;C:\Users\SG\Desktop\SDL3\SDL3_image-3.4.0\include;C:\Users\SG\Desktop\SDL3\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\SG\Desktop\SDL3\SDL3_image-3.4.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL3_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -120,20 +126,72 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>P:\LIBS\SDL-release-3.2.14\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>P:\LIBS\SDL3-3.2.14\include;C:\Users\SG\Desktop\SDL3\SDL3_image-3.4.0\include;C:\Users\SG\Desktop\SDL3\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Users\SG\Desktop\SDL3\SDL3_image-3.4.0\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL3_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="SDL3.cpp" />
+    <ClCompile Include="3D_Maennchen.cpp" />
+    <ClCompile Include="Source\Bauer.cpp" />
+    <ClCompile Include="Source\Client_Network.cpp" />
+    <ClCompile Include="Source\Dame.cpp" />
+    <ClCompile Include="Source\Figuren.cpp" />
+    <ClCompile Include="Source\Koenig.cpp" />
+    <ClCompile Include="Source\Laeufer.cpp" />
+    <ClCompile Include="Source\main_quanten.cpp" />
+    <ClCompile Include="Source\Schach_Logik.cpp" />
+    <ClCompile Include="Source\SDL.cpp" />
+    <ClCompile Include="Source\Server_Network.cpp" />
+    <ClCompile Include="Source\Spiel_Logik.cpp" />
+    <ClCompile Include="Source\Springer.cpp" />
+    <ClCompile Include="Source\Turm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="P:\LIBS\SDL-release-3.2.14\VisualC\SDL\SDL.vcxproj">
       <Project>{81ce8daf-ebb2-4761-8e45-b71abcca8c68}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Header\Bauer.h" />
+    <ClInclude Include="Header\Brett.h" />
+    <ClInclude Include="Header\Client_Network.h" />
+    <ClInclude Include="Header\Dame.h" />
+    <ClInclude Include="Header\Figuren.h" />
+    <ClInclude Include="Header\Koenig.h" />
+    <ClInclude Include="Header\Laeufer.h" />
+    <ClInclude Include="Header\main_quanten.h" />
+    <ClInclude Include="Header\SDL.h" />
+    <ClInclude Include="Header\Server_Network.h" />
+    <ClInclude Include="Header\Spiel_Logik.h" />
+    <ClInclude Include="Header\Springer.h" />
+    <ClInclude Include="Header\stb_image.h" />
+    <ClInclude Include="Header\Turm.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Png\arrow.png" />
+    <Image Include="Png\b_bishop_2x.png" />
+    <Image Include="Png\b_king_2x.png" />
+    <Image Include="Png\b_knight_2x.png" />
+    <Image Include="Png\b_pawn_2x.png" />
+    <Image Include="Png\b_queen_2x.png" />
+    <Image Include="Png\b_rook_2x.png" />
+    <Image Include="Png\merge.png" />
+    <Image Include="Png\split.png" />
+    <Image Include="Png\square brown dark_2x.png" />
+    <Image Include="Png\square brown light_2x.png" />
+    <Image Include="Png\square gray dark _2x.png" />
+    <Image Include="Png\square gray light _2x.png" />
+    <Image Include="Png\w_bishop_2x.png" />
+    <Image Include="Png\w_king_2x.png" />
+    <Image Include="Png\w_knight_2x.png" />
+    <Image Include="Png\w_pawn_2x.png" />
+    <Image Include="Png\w_queen_2x.png" />
+    <Image Include="Png\w_rook_2x.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

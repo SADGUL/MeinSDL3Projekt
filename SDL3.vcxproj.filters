@@ -15,8 +15,150 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="SDL3.cpp">
+    <ClCompile Include="3D_Maennchen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Bauer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Client_Network.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Dame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Figuren.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Koenig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Laeufer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\main_quanten.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Schach_Logik.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\SDL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Server_Network.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Spiel_Logik.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Springer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Turm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Header\Bauer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Brett.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Client_Network.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Dame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Figuren.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Koenig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Laeufer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\main_quanten.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\SDL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Server_Network.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Spiel_Logik.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Springer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\Turm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Header\stb_image.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Png\arrow.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\b_bishop_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\b_king_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\b_knight_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\b_pawn_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\b_queen_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\b_rook_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\merge.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\split.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\square brown dark_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\square brown light_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\square gray dark _2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\square gray light _2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\w_bishop_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\w_king_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\w_knight_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\w_pawn_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\w_queen_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Png\w_rook_2x.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
