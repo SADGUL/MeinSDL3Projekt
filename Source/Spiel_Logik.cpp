@@ -298,20 +298,25 @@ void Logik_Split(int s, int z, Brett& spielfeld, vector <Bauer>& bauern, vector 
 	else if (spielfeld.piece_selected && !spielfeld.first_field_selected) {
 
 		spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Set_Moegliche_Felder(spielfeld);
-
 		moegliche_felder = spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Get_Moegliche_Felder();
+
 		for (int i = 0; i < moegliche_felder.size(); i++) {
-			if (moegliche_felder[i].spalte == s && moegliche_felder[i].zeile == z && moegliche_felder[i].wahrscheinlichkeit == 1.0) {
-				spielfeld.first_field_s = s;
-				spielfeld.first_field_z = z;
-				spielfeld.first_field_selected = true;
-				spielfeld.piece_selected = true;
-				cout << "Erstes Feld gewaehlt" << endl;
-				break;
+			// THE RESTRICTION IS REMOVED HERE
+			if (moegliche_felder[i].spalte == s && moegliche_felder[i].zeile == z) {
+				if (spielfeld.Felder[s - 1][z - 1] == nullptr) {
+					spielfeld.first_field_s = s;
+					spielfeld.first_field_z = z;
+					spielfeld.first_field_selected = true;
+					spielfeld.piece_selected = true;
+					cout << "Erstes Feld gewaehlt" << endl;
+					break;
+				}
+				else {
+					cout << "Ungueltig: Split-Move zielt auf besetztes Feld!" << endl;
+				}
 			}
 		}
 
-		// Wenn kein gültiges Zielfeld geklickt wurde -> Abwählen
 		if (!spielfeld.first_field_selected) {
 			spielfeld.piece_selected = false;
 		}
@@ -321,21 +326,26 @@ void Logik_Split(int s, int z, Brett& spielfeld, vector <Bauer>& bauern, vector 
 	else if (spielfeld.piece_selected && spielfeld.first_field_selected) {
 
 		spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Set_Moegliche_Felder(spielfeld);
-
 		moegliche_felder = spielfeld.Felder[spielfeld.selected_piece_s - 1][spielfeld.selected_piece_z - 1]->Get_Moegliche_Felder();
-		for (int i = 0; i < moegliche_felder.size(); i++) {
-			if (moegliche_felder[i].spalte == s && moegliche_felder[i].zeile == z && moegliche_felder[i].wahrscheinlichkeit == 1.0) {
-				spielfeld.second_field_s = s;
-				spielfeld.second_field_z = z;
-				spielfeld.second_field_selected = true;
-				cout << "Zweites Feld gewaehlt" << endl;
 
-				Split_Move(spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
-				break;
+		for (int i = 0; i < moegliche_felder.size(); i++) {
+			// THE RESTRICTION IS REMOVED HERE
+			if (moegliche_felder[i].spalte == s && moegliche_felder[i].zeile == z) {
+				if (spielfeld.Felder[s - 1][z - 1] == nullptr) {
+					spielfeld.second_field_s = s;
+					spielfeld.second_field_z = z;
+					spielfeld.second_field_selected = true;
+					cout << "Zweites Feld gewaehlt" << endl;
+
+					Split_Move(spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
+					break;
+				}
+				else {
+					cout << "Ungueltig: Split-Move zielt auf besetztes Feld!" << endl;
+				}
 			}
 		}
 
-		// Egal ob der Move erfolgreich war oder ins Leere geklickt wurde, die Auswahl wird zurückgesetzt
 		spielfeld.piece_selected = false;
 		spielfeld.first_field_selected = false;
 		spielfeld.second_field_selected = false;
@@ -343,73 +353,150 @@ void Logik_Split(int s, int z, Brett& spielfeld, vector <Bauer>& bauern, vector 
 }
 
 
-void Split_Move( Brett& spielfeld, vector <Bauer>& bauern, vector <Springer>& springer, vector <Laeufer>& laeufer, vector <Turm>& tuerme, vector <Dame>& damen, vector <Koenig>& koenige) {
-
+void Split_Move(Brett& spielfeld, vector <Bauer>& bauern, vector <Springer>& springer, vector <Laeufer>& laeufer, vector <Turm>& tuerme, vector <Dame>& damen, vector <Koenig>& koenige) {
 
 	int sa = spielfeld.selected_piece_s;
 	int za = spielfeld.selected_piece_z;
-
 	int s1 = spielfeld.first_field_s;
 	int z1 = spielfeld.first_field_z;
-	
 	int s2 = spielfeld.second_field_s;
 	int z2 = spielfeld.second_field_z;
 
 	if (spielfeld.Felder[s1 - 1][z1 - 1] == nullptr && spielfeld.Felder[s2 - 1][z2 - 1] == nullptr) {
 
-		vector <Figuren*> same_pieces;
-		float p = spielfeld.Felder[sa - 1][za - 1]->Get_Wahrscheinlichkeit() / 2;
-		spielfeld.Felder[s1 - 1][z1 - 1] = spielfeld.Felder[sa - 1][za - 1];
-		spielfeld.Felder[s1 - 1][z1 - 1]->Set_Spalte(s1);
-		spielfeld.Felder[s1 - 1][z1 - 1]->Set_Zeile(z1);
-		spielfeld.Felder[s1 - 1][z1 - 1]->Set_Gezogen(true);
-		spielfeld.Felder[s1 - 1][z1 - 1]->Add_Same_Pieces(spielfeld.Felder[sa - 1][za - 1]->Get_Same_Piece());
-		spielfeld.Felder[s1 - 1][z1 - 1]->Set_Wahrscheinlichkeit(p);
-		
+		// 1. Hole Weg-Wahrscheinlichkeiten
+		spielfeld.Felder[sa - 1][za - 1]->Set_Moegliche_Felder(spielfeld);
+		vector<Moegliches_Feld> mf = spielfeld.Felder[sa - 1][za - 1]->Get_Moegliche_Felder();
 
-		switch (spielfeld.Felder[sa - 1][za - 1]->Get_Name()) {
-		
-		case 'S': Create_Springer(sa, za,s2,z2,p, springer, spielfeld);
-			break;
-		case 'L': Create_Laeufer(sa, za, s2, z2, p, laeufer, spielfeld);
-			break;
-		case 'T': Create_Turm(sa, za, s2, z2, p, tuerme, spielfeld);
-			break;
-		case 'D': Create_Dame(sa, za, s2, z2, p, damen, spielfeld);
-			break;
-		case 'K': Create_Koenig(sa, za, s2, z2, p, koenige, spielfeld);
-			break;
+		float prob_path1 = 1.0f;
+		float prob_path2 = 1.0f;
 
-		}
-		
-		
-		same_pieces = spielfeld.Felder[s1 - 1][z1 - 1]->Get_Same_Piece();
-
-		// Neue Versionen zu alten
-		for (int i = 0; i < same_pieces.size(); i++ ){
-			same_pieces[i]->Add_Same_Piece(spielfeld.Felder[s1 - 1][z1 - 1]);
-			same_pieces[i]->Add_Same_Piece(spielfeld.Felder[s2 - 1][z2 - 1]);
-
+		for (int i = 0; i < mf.size(); i++) {
+			if (mf[i].spalte == s1 && mf[i].zeile == z1) prob_path1 = mf[i].wahrscheinlichkeit;
+			if (mf[i].spalte == s2 && mf[i].zeile == z2) prob_path2 = mf[i].wahrscheinlichkeit;
 		}
 
+		// Wahrscheinlichkeits-Berechnung inkl. Hindernisse
+		float p_original = spielfeld.Felder[sa - 1][za - 1]->Get_Wahrscheinlichkeit();
+		float p1 = (p_original / 2.0f) * prob_path1;
+		float p2 = (p_original / 2.0f) * prob_path2;
+		float p_remain = p_original - (p1 + p2);
 
-		// Alte versionen zur neuen Figuren
-		spielfeld.Felder[s2 - 1][z2 - 1]->Add_Same_Pieces(same_pieces);
-		
-		
-		// Neue versionen zu neuen versionen
-		spielfeld.Felder[s1 - 1][z1 - 1]->Add_Same_Piece(spielfeld.Felder[s2 - 1][z2 - 1]);
-		spielfeld.Felder[s2 - 1][z2 - 1]->Add_Same_Piece(spielfeld.Felder[s1 - 1][z1 - 1]);
+		Figuren* original_piece = spielfeld.Felder[sa - 1][za - 1];
+		char name = original_piece->Get_Name();
+		vector<Figuren*> old_same_pieces = original_piece->Get_Same_Piece();
+		vector<Figuren*> old_connected = original_piece->Get_Connected_Piece();
 
+		// 2. Erstelle Figur 1
+		switch (name) {
+		case 'b': Create_Bauer(sa, za, s1, z1, p1, bauern, spielfeld); break;
+		case 'S': Create_Springer(sa, za, s1, z1, p1, springer, spielfeld); break;
+		case 'L': Create_Laeufer(sa, za, s1, z1, p1, laeufer, spielfeld); break;
+		case 'T': Create_Turm(sa, za, s1, z1, p1, tuerme, spielfeld); break;
+		case 'D': Create_Dame(sa, za, s1, z1, p1, damen, spielfeld); break;
+		case 'K': Create_Koenig(sa, za, s1, z1, p1, koenige, spielfeld); break;
+		}
+		Figuren* neu1 = spielfeld.Felder[s1 - 1][z1 - 1];
 
-		
-	
-		spielfeld.Felder[sa - 1][za - 1] = nullptr;
+		// 3. Erstelle Figur 2
+		switch (name) {
+		case 'b': Create_Bauer(sa, za, s2, z2, p2, bauern, spielfeld); break;
+		case 'S': Create_Springer(sa, za, s2, z2, p2, springer, spielfeld); break;
+		case 'L': Create_Laeufer(sa, za, s2, z2, p2, laeufer, spielfeld); break;
+		case 'T': Create_Turm(sa, za, s2, z2, p2, tuerme, spielfeld); break;
+		case 'D': Create_Dame(sa, za, s2, z2, p2, damen, spielfeld); break;
+		case 'K': Create_Koenig(sa, za, s2, z2, p2, koenige, spielfeld); break;
+		}
+		Figuren* neu2 = spielfeld.Felder[s2 - 1][z2 - 1];
+
+		// 4. Vernetze alte "Same Pieces" mit den neuen Teilen
+		for (int i = 0; i < old_same_pieces.size(); i++) {
+			if (old_same_pieces[i] != nullptr) {
+				old_same_pieces[i]->Add_Same_Piece(neu1);
+				old_same_pieces[i]->Add_Same_Piece(neu2);
+			}
+		}
+		neu1->Add_Same_Pieces(old_same_pieces);
+		neu2->Add_Same_Pieces(old_same_pieces);
+
+		// Neue Teile untereinander vernetzen
+		neu1->Add_Same_Piece(neu2);
+		neu2->Add_Same_Piece(neu1);
+
+		// 5. Was passiert mit dem Originalfeld?
+		// Wenn p_remain > 0.0f, ist ein Teil der Figur am Start stecken geblieben!
+		if (p_remain > 0.001f) {
+			original_piece->Set_Wahrscheinlichkeit(p_remain);
+			neu1->Add_Same_Piece(original_piece);
+			neu2->Add_Same_Piece(original_piece);
+			original_piece->Add_Same_Piece(neu1);
+			original_piece->Add_Same_Piece(neu2);
+		}
+		else {
+			// Weg war 100% frei, Originalfeld leeren
+			spielfeld.Felder[sa - 1][za - 1] = nullptr;
+			original_piece->Set_Geschlagen(true);
+		}
+
+		// 6. Verschränkungen auf dem Weg berechnen (Path Entanglement)
+		auto Trace_And_Entangle = [&](int target_s, int target_z, Figuren* neu_figur) {
+			int si = 0, zi = 0;
+			if (target_s > sa) si = 1; else if (target_s < sa) si = -1;
+			if (target_z > za) zi = 1; else if (target_z < za) zi = -1;
+
+			int diff_s = target_s - sa; if (diff_s < 0) diff_s = -diff_s;
+			int diff_z = target_z - za; if (diff_z < 0) diff_z = -diff_z;
+			int steps = max(diff_s, diff_z);
+
+			for (int i = 1; i < steps; i++) {
+				int x = sa + i * si;
+				int y = za + i * zi;
+				if (spielfeld.Felder[x - 1][y - 1] != nullptr) {
+					Figuren* block = spielfeld.Felder[x - 1][y - 1];
+
+					block->Add_Connected_Piece(neu_figur);
+					block->Add_Connected_Piece_S(target_s);
+					block->Add_Connected_Piece_Z(target_z);
+
+					neu_figur->Add_Connected_Piece(block);
+					neu_figur->Add_Connected_Piece_S(x);
+					neu_figur->Add_Connected_Piece_Z(y);
+				}
+			}
+			};
+
+		// Nur verschränken, wenn die Figur nicht springt
+		if (name != 'S' && name != 'b') {
+			Trace_And_Entangle(s1, z1, neu1);
+			Trace_And_Entangle(s2, z2, neu2);
+		}
+
+		// 7. Alte Verschränkungen übernehmen
+		for (int i = 0; i < old_connected.size(); i++) {
+			Figuren* c = old_connected[i];
+			if (c != nullptr && !c->Get_Geschlagen()) {
+				neu1->Add_Connected_Piece(c);
+				neu1->Add_Connected_Piece_S(c->Get_Spalte());
+				neu1->Add_Connected_Piece_Z(c->Get_Zeile());
+
+				neu2->Add_Connected_Piece(c);
+				neu2->Add_Connected_Piece_S(c->Get_Spalte());
+				neu2->Add_Connected_Piece_Z(c->Get_Zeile());
+
+				c->Add_Connected_Piece(neu1);
+				c->Add_Connected_Piece_S(s1);
+				c->Add_Connected_Piece_Z(z1);
+
+				c->Add_Connected_Piece(neu2);
+				c->Add_Connected_Piece_S(s2);
+				c->Add_Connected_Piece_Z(z2);
+			}
+		}
+
 		spielfeld.whites_turn = !spielfeld.whites_turn;
-		cout << "Figur geteilt" << endl;
+		cout << "Figur geteilt (Quanten-Weg berechnet!)" << endl;
 	}
 }
-
 
 
 void Logik_Merge(int s, int z, Brett& spielfeld) {
@@ -528,45 +615,46 @@ void No_Move(Brett& spielfeld) {
 
 }
 
-bool Messung(int s, int z,Brett& spielfeld) {
+bool Messung(int s, int z, Brett& spielfeld) {
 
-	if (!Zufall(spielfeld.Felder[s - 1][z - 1]->Get_Wahrscheinlichkeit())) { // ausgewahlte Figur ist nicht die echte
-		for (int i = 0; i < spielfeld.Felder[s - 1][z - 1]->Get_Same_Piece().size(); i++) { // alle anderen moeglichen durchegehn
-			if (spielfeld.Felder[s - 1][z - 1]->Get_Same_Piece()[i] != nullptr) {
-				if (Zufall(spielfeld.Felder[s - 1][z - 1]->Get_Same_Piece()[i]->Get_Wahrscheinlichkeit()) || (i == spielfeld.Felder[s - 1][z - 1]->Get_Same_Piece().size() - 1)) {
-					// wahrscheinlichkeit tritt ein, oder letzte figur erreicht
-					int s2 = spielfeld.Felder[s - 1][z - 1]->Get_Same_Piece()[i]->Get_Spalte();
-					int z2 = spielfeld.Felder[s - 1][z - 1]->Get_Same_Piece()[i]->Get_Zeile();
-					Kollpas(s2, z2, spielfeld);
+	if (!Zufall(spielfeld.Felder[s - 1][z - 1]->Get_Wahrscheinlichkeit())) {
+		vector<Figuren*> kopien = spielfeld.Felder[s - 1][z - 1]->Get_Same_Piece();
+		for (int i = 0; i < kopien.size(); i++) {
+			if (kopien[i] != nullptr) {
+				if (Zufall(kopien[i]->Get_Wahrscheinlichkeit()) || (i == kopien.size() - 1)) {
+					int s2 = kopien[i]->Get_Spalte();
+					int z2 = kopien[i]->Get_Zeile();
+					Kollaps(s2, z2, spielfeld);
 					break;
 				}
 			}
 		}
-	
 	}
 	else {
-		Kollpas(s, z, spielfeld);
-		
+		Kollaps(s, z, spielfeld);
 		return true;
 	}
 	return false;
 }
 
-void Kollpas(int s, int z, Brett& spielfeld) {
+void Kollaps(int s, int z, Brett& spielfeld) {
 
 	Figuren* echteFigur = spielfeld.Felder[s - 1][z - 1];
 
-	for (int i = 0; i < echteFigur->Get_Same_Piece().size(); i++) {
-		Figuren* F = echteFigur->Get_Same_Piece()[i];
+	// WICHTIG: Liste einmal lokal speichern, um Vektor-Crashs zu vermeiden
+	vector<Figuren*> kopien = echteFigur->Get_Same_Piece();
+
+	for (int i = 0; i < kopien.size(); i++) {
+		Figuren* F = kopien[i];
 		if (F != echteFigur && F != nullptr) {
 			int sl = F->Get_Spalte();
 			int zl = F->Get_Zeile();
 			Feld_Leeren(sl, zl, spielfeld);
-			F->Get_Same_Piece()[i] = nullptr;
+			// Die fehlerhafte Zeile wurde hier komplett entfernt!
 		}
 	}
 	echteFigur->Set_Wahrscheinlichkeit(1.0);
-	echteFigur->Clear_Same_Piece();	
+	echteFigur->Clear_Same_Piece();
 }
 
 
@@ -596,23 +684,21 @@ bool Zufall(double p) {
 }
 
 
-void Messung_Fuer_Verschraenkung(Figuren* F,  Brett& spielfeld) {
-	bool kollpas_erfolgt = false;
-	while (!kollpas_erfolgt) {
-		for (int i = 0; i < F->Get_Same_Piece().size(); i++) { // alle anderen moeglichen durchegehn
-			if (F->Get_Same_Piece()[i] != nullptr) {
-				if (Zufall(F->Get_Same_Piece()[i]->Get_Wahrscheinlichkeit())) {
-					// wahrscheinlichkeit tritt ein, oder letzte figur erreicht
-					int s2 = F->Get_Same_Piece()[i]->Get_Spalte();
-					int z2 = F->Get_Same_Piece()[i]->Get_Zeile();
-					Kollpas(s2, z2, spielfeld);
-					F->Get_Same_Piece()[i]->Set_Wahrscheinlichkeit(1.0);
-					kollpas_erfolgt = true;
-					break;
-				}
+void Messung_Fuer_Verschraenkung(Figuren* F, Brett& spielfeld) {
+	// Die gefährliche "Dauerschleife" (while-loop) wurde durch ein sicheres Fallback ersetzt
+	vector<Figuren*> kopien = F->Get_Same_Piece();
+
+	for (int i = 0; i < kopien.size(); i++) {
+		if (kopien[i] != nullptr) {
+			// Wenn der Zufall trifft, ODER es die letzte mögliche Figur ist (Sicherheitsnetz!)
+			if (Zufall(kopien[i]->Get_Wahrscheinlichkeit()) || i == kopien.size() - 1) {
+				int s2 = kopien[i]->Get_Spalte();
+				int z2 = kopien[i]->Get_Zeile();
+				Kollaps(s2, z2, spielfeld);
+				kopien[i]->Set_Wahrscheinlichkeit(1.0);
+				break;
 			}
 		}
-		cout << "Dauerschleife" << endl;
 	}
 }
 void Kollpas_Verschraenkung(int s, int z, Brett& spielfeld) {

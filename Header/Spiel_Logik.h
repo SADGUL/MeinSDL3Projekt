@@ -33,7 +33,7 @@ void Merge_Move(int sz, int zz, Brett& spielfeld);
 void No_Move(Brett& spielfeld);
 bool Messung(int s, int z, Brett& spielfeld);
 bool Zufall(double p);
-void Kollpas(int s, int z, Brett& spielfeld);
+void Kollaps(int s, int z, Brett& spielfeld);
 void Feld_Leeren(int s, int z, Brett& spielfeld);
 
 void Messung_Fuer_Verschraenkung(Figuren* F, Brett& spielfeld);
