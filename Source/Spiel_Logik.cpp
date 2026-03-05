@@ -1253,7 +1253,7 @@ void Check_for_Mate(Brett& spielfeld) {
 }
 
 // Umwandlung Bauer in Dame
-bool Ceck_For_Promotion(Brett& spielfeld, vector <Dame>& damen){
+bool Check_For_Promotion(Brett& spielfeld, vector <Dame>& damen){
 
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {

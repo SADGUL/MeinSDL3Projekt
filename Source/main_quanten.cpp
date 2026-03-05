@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 
-
 using namespace std;
 
 struct AppState {
@@ -20,16 +19,12 @@ struct AppState {
 
 /**
  * Initializes an SDL3 Window
- * @param appstate AppState struct to store information of the apps state in
- * @return SDL_APP_FAILURE to terminate with an error, SDL_APP_SUCCESS to
- *         terminate with success, SDL_APP_CONTINUE to continue.
  */
 SDL_AppResult AppInit(void** appstate, Window_Configuration WindowConfigs) {
-    // allocate memory for AppState struct
-    if (!(*appstate = SDL_malloc(sizeof(AppState)))) {     //SDL_malloc gibt Zeiger auf reservierten Speicherbreich zurück
-        return SDL_APP_FAILURE;                        //Wenn SDL_malloc nullpointer zurückgibt
+    if (!(*appstate = SDL_malloc(sizeof(AppState)))) {
+        return SDL_APP_FAILURE;
     }
-    auto* state = static_cast<AppState*>(*appstate);   //lokaler Zeiger , static_cast, da malloc void* zurückgibt
+    auto* state = static_cast<AppState*>(*appstate);
     state->title = "Quantum Chess";
 
     if (!SDL_Init(SDL_INIT_VIDEO))
@@ -48,9 +43,6 @@ SDL_AppResult AppInit(void** appstate, Window_Configuration WindowConfigs) {
 
 /**
  * Logic that needs to be done every frame
- * @param appstate AppState struct to store information of the apps state in
- * @return SDL_APP_FAILURE to terminate with an error, SDL_APP_SUCCESS to
- *         terminate with success, SDL_APP_CONTINUE to continue.
  */
 SDL_AppResult AppIterate(void* appstate, Window_Configuration* WindowConfigs, Layout* Game_Layout, MoveButton* Button_Texture, Brett& Spielfeld, vector <Moegliches_Feld> Vector_Moegliche_felder) {
     auto* state = static_cast<AppState*>(appstate);
@@ -58,18 +50,15 @@ SDL_AppResult AppIterate(void* appstate, Window_Configuration* WindowConfigs, La
     if (state->redraw) {
         state->redraw = false;
 
-        // TODO: redraw Frame
-        // clear frame buffer
         SDL_SetRenderDrawColor(state->renderer, 0, 0, 0, 255);
         SDL_RenderClear(state->renderer);
 
-        SDL_GetWindowSize(state->window, &WindowConfigs->WindowWidth, &WindowConfigs->WindowHeight);   //Fenstergröße holen
+        SDL_GetWindowSize(state->window, &WindowConfigs->WindowWidth, &WindowConfigs->WindowHeight);
 
-        Game_Layout->sidebarWidth = WindowConfigs->WindowWidth * Game_Layout->sidebarRatio;         //Breite Sidebar berechnen
+        Game_Layout->sidebarWidth = WindowConfigs->WindowWidth * Game_Layout->sidebarRatio;
         Game_Layout->WidthMinusSidebar = static_cast<float>(WindowConfigs->WindowWidth) - Game_Layout->sidebarWidth;
-        Game_Layout->boardSize = min(static_cast<float>(WindowConfigs->WindowHeight), Game_Layout->WidthMinusSidebar);  //Größe des Spielfelds berechnen, ja nachdem, was kleiner ist
+        Game_Layout->boardSize = min(static_cast<float>(WindowConfigs->WindowHeight), Game_Layout->WidthMinusSidebar);
 
-        //damit unter dem Spieldfeld kein schwarzer Bereich enstehen kann:
         if (Game_Layout->WidthMinusSidebar < static_cast<float>(WindowConfigs->WindowHeight)) {
             WindowConfigs->WindowHeight = WindowConfigs->WindowHeight - (WindowConfigs->WindowHeight - Game_Layout->boardSize);
         }
@@ -78,55 +67,33 @@ SDL_AppResult AppIterate(void* appstate, Window_Configuration* WindowConfigs, La
         }
         SDL_SetWindowSize(state->window, WindowConfigs->WindowWidth, WindowConfigs->WindowHeight);
 
-        //float maxBoardFromWidth = WindowConfigs->WindowWidth / (1.0f + WindowConfigs->sidebarRatio);
-        //float boardSize = min(static_cast<float>(WindowConfigs->WindowHeight),maxBoardFromWidth);
-        //float sidebarWidth = boardSize * WindowConfigs->sidebarRatio;
-
-        // draw chessboard
         drawChessboard(state->window, state->renderer, Game_Layout->boardSize);
-        // Render textures/ figures
         RenderTextures(state->window, state->renderer, Spielfeld, Vector_Moegliche_felder, Game_Layout, WindowConfigs, Button_Texture);
 
-        // swap frame buffer
         SDL_RenderPresent(state->renderer);
-
-        //determine the possible fields to which a piece could be moved
-      //   setPossibleFields(Spielfeld);
     }
 
     return SDL_APP_CONTINUE;
 }
 
-// TODO: add javadoc
 int drawChessboard(SDL_Window* window, SDL_Renderer* renderer, float width) {
     constexpr int boardFields = 8;
+    const float squareSize = (width * 1.0f) / (boardFields * 1.0f);
 
-    // get size of squares
-    const float squareSize = (width * 1.0f) / (boardFields * 1.0f);    //*1.f -> float/float und nicht mehr int/int
-
-    // render Background
     SDL_RenderClear(renderer);
 
-    // render squares
     for (int row = 0; row < 8; row++) {
         for (int col = 0; col < 8; col++) {
-
-            // Alternate colors
             if ((row + col) % 2 == 0) {
-                // SDL_SetRenderDrawColor(renderer, 240, 240, 240, 255);
-                SDL_SetRenderDrawColor(renderer, 240, 217, 181, 255);      //Farbe linchess
+                SDL_SetRenderDrawColor(renderer, 240, 217, 181, 255);
             }
             else {
-                //SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
-                SDL_SetRenderDrawColor(renderer, 181, 136, 99, 255);       //Farbe linchess
+                SDL_SetRenderDrawColor(renderer, 181, 136, 99, 255);
             }
             SDL_FRect rect = { col * squareSize, row * squareSize, squareSize, squareSize };
-
             SDL_RenderFillRect(renderer, &rect);
-
         }
     }
-
     return 0;
 }
 
@@ -148,28 +115,24 @@ void RenderTextures(SDL_Window* window, SDL_Renderer* renderer, Brett& Spielfeld
                 col = Spielfeld.Felder[i][j]->Get_Spalte();
                 row = 8 - row;
                 col = col - 1;
-                SDL_FRect rect = { col * squareSize, row * squareSize, squareSize, squareSize - 5 }; //Figur im Feld nach oben verschoben
+                SDL_FRect rect = { col * squareSize, row * squareSize, squareSize, squareSize - 5 };
                 SDL_RenderTexture(renderer, Spielfeld.Felder[i][j]->Get_Texture(), NULL, &rect);
 
-                //Wahrscheinlichkeitsanzeige
                 probability = Spielfeld.Felder[i][j]->Get_Wahrscheinlichkeit();
-                width = squareSize * probability;  //Länge des Balken ist abhängig von der Wahrscheinlichkeit
-                SDL_FRect probability_bar = { col * squareSize, (row * squareSize) + (squareSize - height + 2) , width, height }; //Balken unterhalb der Figur
-                SDL_SetRenderDrawColor(renderer, 0, 0, 255.0f, 0); //blau
+                width = squareSize * probability;
+                SDL_FRect probability_bar = { col * squareSize, (row * squareSize) + (squareSize - height + 2) , width, height };
+                SDL_SetRenderDrawColor(renderer, 0, 0, 255.0f, 0);
                 SDL_RenderFillRect(renderer, &probability_bar);
             }
         }
     }
 
-    //mögliche Felder
+    //moegliche Felder
     for (int i = 0; i < Vector_Moegliche_felder.size(); i++) {
         col = Vector_Moegliche_felder[i].spalte - 1;
         row = 8 - Vector_Moegliche_felder[i].zeile;
-        //cout <<"Spalte: "<<  col << "  Zeile:" << row << endl;    Nur zum Testen
         SDL_FRect rect = { col * squareSize, row * squareSize, squareSize, squareSize };
         GreenCircle(renderer, rect);
-        //SDL_SetRenderDrawColor(renderer, 57, 255, 20, 255);
-        //SDL_RenderFillRect(renderer, &rect);
     }
 
     //sidebar button aktiviert:
@@ -196,8 +159,6 @@ void RenderTextures(SDL_Window* window, SDL_Renderer* renderer, Brett& Spielfeld
 
     SDL_FRect button_merge = { Game_Layout->boardSize , 2 * height_button, Game_Layout->sidebarWidth , height_button };
     SDL_RenderTexture(renderer, Button_Texture->merge, NULL, &button_merge);
-
-
 }
 
 void GreenCircle(SDL_Renderer* renderer, SDL_FRect rect) {
@@ -208,36 +169,28 @@ void GreenCircle(SDL_Renderer* renderer, SDL_FRect rect) {
     float y_rect = rect.y;
     float x_rect = rect.x;
 
-    float center_x = x_rect + (width_rect / 2.0f);   //Float Division
+    float center_x = x_rect + (width_rect / 2.0f);
     float center_y = y_rect + (height_rect / 2.0f);
 
     float radius = width_rect / 4.0f;
 
-    const int segments = 32;    //Kreis bzw. Polygon mit 32 Segmenten
-    SDL_Vertex vertices[segments + 1];   // Randpunkte + Mittelpunkt
-    int PointsOfCircle[segments * 3];  // Alle Punkte die den Kreis definieren. Immer 3 Punkte pro dreieck -> 32 *3
+    const int segments = 32;
+    SDL_Vertex vertices[segments + 1];
+    int PointsOfCircle[segments * 3];
 
     SDL_FColor Color = { 57.0f / 255.0f, 1.0f, 20.0f / 255.0f, 0.5f };
 
-    //Mittelpunkt:
     vertices[0] = { {center_x, center_y},Color,{0.0f, 0.0f} };
 
-    // Kreisumfang
     for (int i = 0; i < segments; i++) {
-        float angle = (float)i / segments * 2.0f * SDL_PI_F;   // i durch 32 mal 2pi -> gleichmäßige Verteilung
-        //Mit diesen Winkel nun die Randpunkte (Einheitskreis)
+        float angle = (float)i / segments * 2.0f * SDL_PI_F;
         vertices[i + 1] = { {center_x + radius * SDL_sinf(angle),center_y + radius * SDL_cosf(angle)},Color, {0.0f, 0.0f} };
     }
 
-    //Alle Punkte:
-    //Immer nacheinander drei Punkte gehören zu einem Dreieck
-    //Ich muss in PointOfCirle nur sagen welcher Platz im Array verticles dem Punkt des Dreiecks entspricht
-    // Der Rest macht dann SDL_RenderGeometry
-
     for (int i = 0; i < segments; i++) {
-        PointsOfCircle[i * 3] = 0;           //Mittelpunkt (immer jeder 3. Punkt)
-        PointsOfCircle[i * 3 + 1] = i + 1;    // Erster Randpunkt: vertices[i + 1]
-        PointsOfCircle[i * 3 + 2] = (i + 1) % segments + 1;  // Zweiter Randpunkt: Modulo wichtig, damit letzter punkt wieder 0 + 1,also erste Randpunkt wieder
+        PointsOfCircle[i * 3] = 0;
+        PointsOfCircle[i * 3 + 1] = i + 1;
+        PointsOfCircle[i * 3 + 2] = (i + 1) % segments + 1;
     }
 
     SDL_RenderGeometry(renderer, nullptr, vertices, segments + 1, PointsOfCircle, segments * 3);
@@ -263,7 +216,6 @@ void createTexture(void* appstate, Brett& Spielfeld) {
                 string path = Spielfeld.Felder[i][j]->Get_Dateipfad();
                 const char* c_path = path.c_str();
 
-                // Use our new stb_image helper function instead of SDL_LoadPNG!
                 SDL_Texture* texture = CreateTexture_from_Image(state->renderer, c_path);
 
                 if (!texture) {
@@ -271,13 +223,13 @@ void createTexture(void* appstate, Brett& Spielfeld) {
                         << " Position: " << i << " " << j << endl;
                 }
                 else {
-                    // Only set the texture if it successfully loaded
                     Spielfeld.Felder[i][j]->Set_Texture(texture);
                 }
             }
         }
     }
 }
+
 void createButtonTextures(void* appstate, MoveButton* Button_Texture) {
     const auto* state = static_cast<AppState*>(appstate);
     Button_Texture->normal = CreateTexture_from_Image(state->renderer, "Png/arrow.png");
@@ -288,8 +240,6 @@ void createButtonTextures(void* appstate, MoveButton* Button_Texture) {
 SDL_Texture* CreateTexture_from_Image(SDL_Renderer* renderer, const char* c_path) {
     int width, height, original_channels;
 
-    // 1. Load the image data using stbi_load. 
-    // We pass '4' at the end to force it to load Red, Green, Blue, and Alpha (transparency).
     unsigned char* pixels = stbi_load(c_path, &width, &height, &original_channels, 4);
 
     if (!pixels) {
@@ -297,85 +247,64 @@ SDL_Texture* CreateTexture_from_Image(SDL_Renderer* renderer, const char* c_path
         return nullptr;
     }
 
-    // 2. Create an SDL_Surface from those raw STB pixels
-    // Pitch (the last number) is width * 4 because there are 4 color channels per pixel.
     SDL_Surface* surface = SDL_CreateSurfaceFrom(width, height, SDL_PIXELFORMAT_RGBA32, pixels, width * 4);
 
     if (!surface) {
         std::cout << "Fehler bei SDL_Surface Erstellung: " << SDL_GetError() << std::endl;
-        stbi_image_free(pixels); // Prevent memory leaks!
+        stbi_image_free(pixels);
         return nullptr;
     }
 
-    // 3. Convert that surface into an SDL_Texture
     SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-    // 4. Clean up the temporary surface and the raw pixel data
     SDL_DestroySurface(surface);
     stbi_image_free(pixels);
 
     return texture;
 }
 
-/*
-void loadTextureWithSDL3(vector<figures>& InfoFigures, void* appstate) {
-    const auto* state = static_cast<AppState*>(appstate);
-
-    for (int i = 0; i < InfoFigures.size(); i++) {
-
-        SDL_Surface* surface = SDL_LoadPNG(InfoFigures[i].path);
-        if (!surface) {
-            cout << "Fehler beim Laden von Figur:" << InfoFigures[i].name << SDL_GetError() << endl;
-        }
-
-        // Textur erstellen
-        InfoFigures[i].texture = SDL_CreateTextureFromSurface(state->renderer, surface);
-        SDL_DestroySurface(surface);
-    }
-
-
-}
-
-*/
 void calculateFieldFromCoordinates(void* appstate, const float& mouseX, const float& mouseY, int* selectedRow, int* selectedCol, Layout* Game_Layout, Window_Configuration* WindowConfigs, MoveButton* Button) {
     const auto* state = static_cast<AppState*>(appstate);
 
     constexpr int boardFields = 8;
+    float squareSize = Game_Layout->boardSize / static_cast<float>(boardFields);
 
-    float squareSize = Game_Layout->boardSize / static_cast<float>(boardFields);     //da Feld quadratisch egal ob Breite oder Höhe
-    /*
-    *selectedRow = 8 - (static_cast<int>(mouseY / squareSize));
-    *selectedCol = (static_cast<int>(mouseX / squareSize)) + 1;
-    */
-
-    if (mouseX <= Game_Layout->boardSize) {    //mausklick im Spielfeld
+    if (mouseX <= Game_Layout->boardSize) {    // mausklick im Spielfeld
         *selectedRow = 8 - (static_cast<int>(mouseY / squareSize));
         *selectedCol = (static_cast<int>(mouseX / squareSize)) + 1;
+
+        // ==========================================
+        // --- SAFETY CLAMPS ---
+        // Verhindert, dass mathematische Rundungsfehler das Array crashen
+        if (*selectedRow < 1) *selectedRow = 1;
+        if (*selectedRow > 8) *selectedRow = 8;
+        if (*selectedCol < 1) *selectedCol = 1;
+        if (*selectedCol > 8) *selectedCol = 8;
+        // ==========================================
     }
     else {
+        // Klick in der Sidebar -> Radio-Button Logik!
         if ((mouseY <= WindowConfigs->WindowHeight / 3.0f)) {
-            Button->normal_move = !Button->normal_move;
-            cout << "Normal Move: " << Button->normal_move << endl;
+            Button->normal_move = true;
+            Button->split_move = false;
+            Button->merge_move = false;
+            cout << "Modus: Normal Move" << endl;
         }
         else if (mouseY < WindowConfigs->WindowHeight / 3.0f * 2) {
-            Button->split_move = !Button->split_move;
-            cout << "Split Move: " << Button->split_move << endl;
+            Button->normal_move = false;
+            Button->split_move = true;
+            Button->merge_move = false;
+            cout << "Modus: Split Move" << endl;
         }
         else {
-            Button->merge_move = !Button->merge_move;
-            cout << "Merge Move: " << Button->merge_move << endl;
+            Button->normal_move = false;
+            Button->split_move = false;
+            Button->merge_move = true;
+            cout << "Modus: Merge Move" << endl;
         }
     }
 }
 
-
-/**
- * Handles SDL events
- * @param appstate AppState struct to store information of the apps state in
- * @param event Pointer of the event to handle
-* @return SDL_APP_FAILURE to terminate with an error, SDL_APP_SUCCESS to
- *        terminate with success, SDL_APP_CONTINUE to continue.
- */
 SDL_AppResult AppEvent(void* appstate, SDL_Event* event, float* mouseX, float* mouseY, int* selectedRow, int* selectedCol, Layout* Game_Layout, Window_Configuration* WindowConfigs, MoveButton* Button) {
     auto* state = static_cast<AppState*>(appstate);
 
@@ -388,41 +317,30 @@ SDL_AppResult AppEvent(void* appstate, SDL_Event* event, float* mouseX, float* m
         return SDL_APP_SUCCESS;
     case SDL_EVENT_MOUSE_BUTTON_DOWN: {
         if (event->button.button == SDL_BUTTON_LEFT) {
-            *mouseX = event->button.x;          //X Werte von der Maus
-            *mouseY = event->button.y;          //Y Werte von der Maus
+            *mouseX = event->button.x;
+            *mouseY = event->button.y;
             calculateFieldFromCoordinates(appstate, *mouseX, *mouseY, selectedRow, selectedCol, Game_Layout, WindowConfigs, Button);
             state->redraw = true;
         }
     }
-    default:    // ignore all events not listed above
+    default:
         break;
     }
 
     return SDL_APP_CONTINUE;
 }
 
-/**
- * Gets called when quitting SDL
- * @param appstate AppState struct to store information of the apps state in
-* @param result SDL_APP_FAILURE to terminate with an error, SDL_APP_SUCCESS to
- *              terminate with success, SDL_APP_CONTINUE to continue.
- */
 void AppQuit(void* appstate, SDL_AppResult result) {
-    //Cleanup here
     const auto* state = static_cast<AppState*>(appstate);
     SDL_DestroyRenderer(state->renderer);
     SDL_DestroyWindow(state->window);
     if (result == SDL_APP_FAILURE)
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error",
             SDL_GetError(), appstate ? state->window : NULL);
-    SDL_free(appstate); // deallocate AppState
+    SDL_free(appstate);
     SDL_Quit();
 }
 
-/**
- * Pseudo main function to run an SDL Window
- * @return error code
- */
 int main() {
     // init SDL
     void* appstate = nullptr;
@@ -430,9 +348,7 @@ int main() {
 
     SDL_AppResult result = AppInit(&appstate, WindowConfigs);
 
-
     if (result == SDL_APP_CONTINUE) {
-
 
         Brett Spielfeld;
 
@@ -442,6 +358,14 @@ int main() {
         vector <Turm> tuerme;
         vector <Dame> damen;
         vector <Koenig> koenige;
+
+        // RESERVE MEMORY TO PREVENT VECTOR REALLOCATION (Verschränkung fix)
+        bauern.reserve(100);
+        springer.reserve(100);
+        laeufer.reserve(100);
+        tuerme.reserve(100);
+        damen.reserve(100);
+        koenige.reserve(100);
 
         Spielfeld_Reset(Spielfeld);
         Startaufstellung_Bauern(bauern, Spielfeld);
@@ -454,20 +378,17 @@ int main() {
         Layout Game_Layout;
         MoveButton Button_Texture;
 
-
-        createTexture(appstate, Spielfeld);                //Datenpfad in Textur
+        createTexture(appstate, Spielfeld);
         createButtonTextures(appstate, &Button_Texture);
 
-        // main loop
-        //bool running = true;
         SDL_Event event;
 
-        float mouseX = 0;  //mouseclick x coordinates
-        float mouseY = 0;  //mouseclick y coordinates
-        int selectedRow = 0;    //current selectedRow
-        int selectedCol = 0;    //current selectedCol
+        float mouseX = 0;
+        float mouseY = 0;
+        int selectedRow = 0;
+        int selectedCol = 0;
 
-        // 1. DELETE 'a' and 'b'. Add a newClick flag instead:
+        // NEW EVENT FLAG
         bool newClick = false;
 
         vector <Moegliches_Feld> Vector_Moegliche_felder;
@@ -477,7 +398,7 @@ int main() {
             // handle events
             while (SDL_PollEvent(&event)) {
 
-                // 2. DETECT the physical click here and set the flag
+                // DETECT ACTUAL CLICK
                 if (event.type == SDL_EVENT_MOUSE_BUTTON_DOWN && event.button.button == SDL_BUTTON_LEFT) {
                     newClick = true;
                 }
@@ -496,7 +417,7 @@ int main() {
                 }
             }
 
-            // 3. ONLY execute the game logic if a fresh click happened
+            // ONLY EXECUTE IF A CLICK OCCURRED
             if (newClick && !Spielfeld.schachmatt) {
                 if (Button_Texture.normal_move && !Button_Texture.split_move && !Button_Texture.merge_move) {
                     Logik_normal(selectedCol, selectedRow, Spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
@@ -511,12 +432,33 @@ int main() {
                     No_Move(Spielfeld);
                 }
 
-                if (Ceck_For_Promotion(Spielfeld, damen)) {
+                if (Check_For_Promotion(Spielfeld, damen)) {
                     createTexture(appstate, Spielfeld);
                 }
                 Check_For_Kollaps_Verschraenkung(Spielfeld);
+
+                // ==========================================
+                // CHECK FOR MATE IMMEDIATELY AFTER COLLAPSE
+                // ==========================================
+                Check_for_Mate(Spielfeld);
+
                 cout << "Ausgewaehlte Reihe: " << selectedRow << endl;
                 cout << "Ausgewaehlte Spalte: " << selectedCol << endl;
+
+                // ==========================================
+                // WINNER POPUP ANNOUNCEMENT
+                // ==========================================
+                if (Spielfeld.schachmatt) {
+                    const char* winnerText = Spielfeld.whites_turn ? "Black wins by Checkmate!" : "White wins by Checkmate!";
+                    auto* state = static_cast<AppState*>(appstate);
+
+                    // The game pauses right here until the player closes the pop-up
+                    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over!", winnerText, state->window);
+
+                    // Break out of the while(true) loop to trigger AppQuit and close the game!
+                    break;
+                }
+                // ==========================================
 
                 if (Spielfeld.piece_selected) {
                     Spielfeld.Felder[Spielfeld.selected_piece_s - 1][Spielfeld.selected_piece_z - 1]->Set_Moegliche_Felder(Spielfeld);
@@ -526,11 +468,10 @@ int main() {
                     Vector_Moegliche_felder.clear();
                 }
 
-                // 4. RESET the flag so we don't process the same click again!
+                // CONSUME CLICK
                 newClick = false;
             }
 
-            // (Render frame as normal below)
             if (Spielfeld.piece_selected) {
                 AppIterate(appstate, &WindowConfigs, &Game_Layout, &Button_Texture, Spielfeld, Vector_Moegliche_felder);
             }
@@ -540,7 +481,6 @@ int main() {
         }
     }
 
-    // Deconstruct
     AppQuit(appstate, result);
     return 0;
 }

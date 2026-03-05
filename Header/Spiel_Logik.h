@@ -63,7 +63,7 @@ void Check_Castle_Selected(int i, vector <Moegliches_Feld> moegliche_felder, Bre
 
 void Check_for_Mate(Brett& spielfeld);
 
-bool Ceck_For_Promotion(Brett& spielfeld, vector <Dame>& damen);
+bool Check_For_Promotion(Brett& spielfeld, vector <Dame>& damen);
 void Make_Queen(int s, int z, Brett& spielfeld, vector <Dame>& damen);
 
 void Check_For_Double_Pawn(int i, vector <Moegliches_Feld> moegliche_felder, Brett& spielfeld);
