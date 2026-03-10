@@ -90,7 +90,7 @@ public:
 
 	virtual void Add_Connected_Pieces(vector <Figuren*> new_connected_piece);
 	virtual void Add_Connected_Piece(Figuren* F);
-	virtual void Replace_Connected_Piece(int i, Figuren);
+	virtual void Replace_Connected_Piece(int i, Figuren* F);
 	virtual void Clear_Connected_Piece();
 
 	virtual void Add_Connected_Piece_S(int s);

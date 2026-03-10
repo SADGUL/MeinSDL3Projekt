@@ -341,8 +341,376 @@ void AppQuit(void* appstate, SDL_AppResult result) {
     SDL_Quit();
 }
 
+
+
+
+
+
+
+
+
+
+
+// ==========================================
+// HILFSFUNKTIONEN FÜR DAS SETUP
+// ==========================================
+void Setup_Test_Board(Brett& Spielfeld, vector<Bauer>& bauern, vector<Springer>& springer, vector<Laeufer>& laeufer, vector<Turm>& tuerme, vector<Dame>& damen, vector<Koenig>& koenige) {
+    bauern.clear(); springer.clear(); laeufer.clear();
+    tuerme.clear(); damen.clear(); koenige.clear();
+
+    bauern.reserve(100); springer.reserve(100); laeufer.reserve(100);
+    tuerme.reserve(100); damen.reserve(100); koenige.reserve(100);
+
+    Spielfeld_Reset(Spielfeld);
+    Startaufstellung_Bauern(bauern, Spielfeld);
+    Startaufstellung_Springer(springer, Spielfeld);
+    Startaufstellung_Laeufer(laeufer, Spielfeld);
+    Startaufstellung_Tuerme(tuerme, Spielfeld);
+    Startaufstellung_Damen(damen, Spielfeld);
+    Startaufstellung_Koenige(koenige, Spielfeld);
+    Spielfeld.whites_turn = true;
+}
+
+void PrintResult(bool condition, string errorMessage) {
+    if (condition) {
+        cout << "[ERFOLG]" << endl << endl;
+    }
+    else {
+        cout << "[FEHLER] " << errorMessage << endl << endl;
+    }
+}
+
+// ==========================================
+// KATEGORIE 1: KLASSISCHES SCHACH
+// ==========================================
+
+void Test_1_1_NormalerZug() {
+    cout << "Test 1.1: Standard-Bewegung (Bauer e2 nach e4)... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    Logik_normal(5, 2, Spielfeld, b, s, l, t, d, k); // e2 auswählen
+    Logik_normal(5, 4, Spielfeld, b, s, l, t, d, k); // e4 Ziel
+
+    PrintResult(Spielfeld.Felder[4][3] != nullptr && Spielfeld.Felder[4][1] == nullptr, "Bauer hat sich nicht korrekt bewegt.");
+}
+
+void Test_1_2_Blockade() {
+    cout << "Test 1.2: Blockaden (Turm a1 durch Bauer a2 ziehen)... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    Logik_normal(1, 1, Spielfeld, b, s, l, t, d, k); // Turm a1 auswählen
+    Logik_normal(1, 3, Spielfeld, b, s, l, t, d, k); // Versuch nach a3
+
+    PrintResult(Spielfeld.Felder[0][2] == nullptr && Spielfeld.Felder[0][0] != nullptr, "Turm ist illegal durch den Bauern gezogen.");
+}
+
+void Test_1_3_Schlagen() {
+    cout << "Test 1.3: Normales Schlagen (e4 -> d5)... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // Weiß: e2 -> e4
+    Logik_normal(5, 2, Spielfeld, b, s, l, t, d, k); Logik_normal(5, 4, Spielfeld, b, s, l, t, d, k);
+    Spielfeld.whites_turn = false; // Manueller Wechsel (falls deine Logik das nicht tut)
+
+    // Schwarz: d7 -> d5
+    Logik_normal(4, 7, Spielfeld, b, s, l, t, d, k); Logik_normal(4, 5, Spielfeld, b, s, l, t, d, k);
+    Spielfeld.whites_turn = true;
+
+    // Weiß: e4 -> d5 (Schlagen)
+    Logik_normal(5, 4, Spielfeld, b, s, l, t, d, k); Logik_normal(4, 5, Spielfeld, b, s, l, t, d, k);
+
+    PrintResult(Spielfeld.Felder[3][4] != nullptr && Spielfeld.Felder[3][4]->Get_Farbe() == true, "Weißer Bauer hat schwarzen Bauern nicht korrekt geschlagen.");
+}
+
+
+// ==========================================
+// KATEGORIE 2: SPEZIELLE SCHACHREGELN
+// ==========================================
+
+void Test_2_1_EnPassant() {
+    cout << "Test 2.1: En Passant... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // Setup: Weiß Bauer e2->e5, Schwarz Bauer d7->d5 (Doppelschritt daneben)
+    Logik_normal(5, 2, Spielfeld, b, s, l, t, d, k); Logik_normal(5, 4, Spielfeld, b, s, l, t, d, k);
+    Spielfeld.whites_turn = true;
+    Logik_normal(5, 4, Spielfeld, b, s, l, t, d, k); Logik_normal(5, 5, Spielfeld, b, s, l, t, d, k);
+    Spielfeld.whites_turn = false;
+    Logik_normal(4, 7, Spielfeld, b, s, l, t, d, k); Logik_normal(4, 5, Spielfeld, b, s, l, t, d, k);
+
+    Spielfeld.whites_turn = true;
+    // En Passant Schlag (e5 -> d6)
+    Logik_normal(5, 5, Spielfeld, b, s, l, t, d, k); Logik_normal(4, 6, Spielfeld, b, s, l, t, d, k);
+
+    // Bauer d5 muss weg sein, weißer Bauer auf d6
+    PrintResult(Spielfeld.Felder[3][4] == nullptr && Spielfeld.Felder[3][5] != nullptr, "En Passant hat nicht funktioniert (oder Gegner nicht gelöscht).");
+}
+
+// ==========================================
+// KATEGORIE 3: QUANTEN-MECHANIKEN
+// ==========================================
+
+void Test_3_1_SplitMove() {
+    cout << "Test 3.1: Quanten Split Move... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // 1. Klick: Springer auf g1 (Spalte 7, Zeile 1) auswählen
+    Logik_Split(7, 1, Spielfeld, b, s, l, t, d, k);
+
+    // 2. Klick: Erstes Zielfeld f3 (Spalte 6, Zeile 3)
+    Logik_Split(6, 3, Spielfeld, b, s, l, t, d, k);
+
+    // 3. Klick: Zweites Zielfeld h3 (Spalte 8, Zeile 3) -> Löst den Zug aus!
+    Logik_Split(8, 3, Spielfeld, b, s, l, t, d, k);
+
+    // Prüfen, ob die Figuren nun auf den beiden ZIELFELDERN liegen
+    Figuren* feld_1 = Spielfeld.Felder[5][2]; // f3 (Spalte 6, Zeile 3)
+    Figuren* feld_2 = Spielfeld.Felder[7][2]; // h3 (Spalte 8, Zeile 3)
+
+    if (feld_1 != nullptr && feld_2 != nullptr) {
+        PrintResult(feld_1->Get_Wahrscheinlichkeit() == 0.5f && feld_2->Get_Wahrscheinlichkeit() == 0.5f, "Wahrscheinlichkeiten nicht 50/50 geteilt.");
+    }
+    else {
+        cout << "[FEHLER] Gesplittete Figur fehlt auf f3 oder h3!" << endl;
+    }
+}
+
+void Test_3_3_MergeMove() {
+    cout << "Test 3.3: Quanten Merge Move... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // 1. Erst Splitten (3 Klicks)
+    Logik_Split(7, 1, Spielfeld, b, s, l, t, d, k); // Springer auf g1 wählen
+    Logik_Split(6, 3, Spielfeld, b, s, l, t, d, k); // Split-Ziel 1: f3
+    Logik_Split(8, 3, Spielfeld, b, s, l, t, d, k); // Split-Ziel 2: h3
+
+    // Wieder Weiß an den Zug lassen, da der Split den Zug beendet hat
+    Spielfeld.whites_turn = true;
+
+    // 2. Jetzt Mergen (ebenfalls 3 Klicks!)
+    Logik_Merge(6, 3, Spielfeld); // Klick 1: Teilfigur auf f3 anwählen
+    Logik_Merge(8, 3, Spielfeld); // Klick 2: Teilfigur auf h3 anwählen
+    Logik_Merge(7, 5, Spielfeld); // Klick 3: ZIELFELD g5 anwählen -> Löst den Merge aus!
+
+    // 3. Ergebnis prüfen
+    Figuren* feld_ziel = Spielfeld.Felder[6][4]; // Array-Index für g5 (Spalte 7, Zeile 5)
+
+    if (feld_ziel != nullptr) {
+        PrintResult(feld_ziel->Get_Wahrscheinlichkeit() == 1.0f, "Figur steht auf g5, hat aber keine 100% (1.0) Wahrscheinlichkeit.");
+    }
+    else {
+        cout << "[FEHLER] Keine Figur auf dem Ziel-Feld g5 angekommen!" << endl;
+    }
+}
+// ==========================================
+// KATEGORIE 4: FORTGESCHRITTENE REGELN & QUANTEN-PHYSIK
+// ==========================================
+
+void Test_4_1_Bauernumwandlung() {
+    cout << "Test 4.1: Bauernumwandlung (Promotion)... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // Setup: Wir machen den Weg für den weißen a-Bauern komplett frei
+    Spielfeld.Felder[0][6] = nullptr; // Schwarzer Bauer auf a7 wird entfernt
+    Spielfeld.Felder[0][7] = nullptr; // NEU: Schwarzer Turm auf a8 wird entfernt!
+
+    // Weißer Bauer marschiert Schritt für Schritt durch
+    Logik_normal(1, 2, Spielfeld, b, s, l, t, d, k); Logik_normal(1, 4, Spielfeld, b, s, l, t, d, k); // a2 -> a4
+    Spielfeld.whites_turn = true;
+    Logik_normal(1, 4, Spielfeld, b, s, l, t, d, k); Logik_normal(1, 5, Spielfeld, b, s, l, t, d, k); // a4 -> a5
+    Spielfeld.whites_turn = true;
+    Logik_normal(1, 5, Spielfeld, b, s, l, t, d, k); Logik_normal(1, 6, Spielfeld, b, s, l, t, d, k); // a5 -> a6
+    Spielfeld.whites_turn = true;
+    Logik_normal(1, 6, Spielfeld, b, s, l, t, d, k); Logik_normal(1, 7, Spielfeld, b, s, l, t, d, k); // a6 -> a7
+    Spielfeld.whites_turn = true;
+    Logik_normal(1, 7, Spielfeld, b, s, l, t, d, k); Logik_normal(1, 8, Spielfeld, b, s, l, t, d, k); // a7 -> a8
+
+    // Die Umwandlungsfunktion aufrufen
+    Check_For_Promotion(Spielfeld, d);
+
+    Figuren* feld_a8 = Spielfeld.Felder[0][7];
+    PrintResult(feld_a8 != nullptr && feld_a8->Get_Name() == 'D', "Bauer wurde auf a8 nicht in eine Dame ('D') umgewandelt.");
+}
+
+void Test_4_2_Rochade() {
+    cout << "Test 4.2: Kurze Rochade (Castling)... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // Setup: Läufer (f1) und Springer (g1) entfernen, damit der Weg zwischen König (e1) und Turm (h1) frei ist
+    Spielfeld.Felder[5][0] = nullptr;
+    Spielfeld.Felder[6][0] = nullptr;
+
+    // König von e1(5,1) nach g1(7,1) bewegen
+    Logik_normal(5, 1, Spielfeld, b, s, l, t, d, k);
+    Logik_normal(7, 1, Spielfeld, b, s, l, t, d, k);
+
+    Figuren* koenig = Spielfeld.Felder[6][0]; // g1
+    Figuren* turm = Spielfeld.Felder[5][0];   // f1
+
+    PrintResult(koenig != nullptr && koenig->Get_Name() == 'K' && turm != nullptr && turm->Get_Name() == 'T', "König oder Turm stehen nach der Rochade auf dem falschen Feld.");
+}
+
+void Test_4_3_Quanten_Kollaps() {
+    cout << "Test 4.3: Quanten-Schlagen & Kollaps (Schrödingers Katze)... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // Setup: Schwarzer Springer von b8(2,8) splittet auf a6(1,6) und c6(3,6)
+    Spielfeld.whites_turn = false;
+    Logik_Split(2, 8, Spielfeld, b, s, l, t, d, k);
+    Logik_Split(1, 6, Spielfeld, b, s, l, t, d, k);
+    Logik_Split(3, 6, Spielfeld, b, s, l, t, d, k);
+
+    // Den Weg für den weißen a1-Turm freimachen (weißen a2-Bauern löschen)
+    Spielfeld.Felder[0][1] = nullptr;
+
+    // Weißer Turm von a1(1,1) greift die 50%-Figur auf a6(1,6) an
+    Spielfeld.whites_turn = true;
+    Logik_normal(1, 1, Spielfeld, b, s, l, t, d, k);
+    Logik_normal(1, 6, Spielfeld, b, s, l, t, d, k);
+
+    // Auswertung: Da Zufall im Spiel ist, wissen wir nicht, welches Feld gewinnt.
+    // Aber wir wissen: EINE der beiden schwarzen Springer-Positionen muss nun 100% (oder tot) sein.
+    Figuren* feld_c6 = Spielfeld.Felder[2][5]; // Der alternative Springer auf c6
+    Figuren* feld_a6 = Spielfeld.Felder[0][5]; // Das Angriffsfeld
+
+    bool kollaps_korrekt = false;
+    if (feld_a6 != nullptr && feld_a6->Get_Name() == 'T') {
+        // Weißer Turm steht auf a6. Was ist mit dem schwarzen Springer auf c6 passiert?
+        if (feld_c6 == nullptr) {
+            // Fall 1: Springer war auf a6 (wurde geschlagen), c6 ist verpufft.
+            kollaps_korrekt = true;
+        }
+        else if (feld_c6 != nullptr && feld_c6->Get_Wahrscheinlichkeit() == 1.0f) {
+            // Fall 2: Springer war NICHT auf a6 (Turm griff ins Leere), c6 wurde dafür 100% real.
+            kollaps_korrekt = true;
+        }
+    }
+
+    PrintResult(kollaps_korrekt, "Der Quantenkollaps hat kein logisch valides Ergebnis (0% oder 100%) erzeugt.");
+}
+
+void Test_4_4_Geister_Blockade() {
+    cout << "Test 4.4: Wegfindung durch Quanten-Figuren (Geister-Blockade)... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // Setup: Wir setzen gezielt Figuren, um einen komplexen Weg zu testen
+    Spielfeld_Reset(Spielfeld); // Komplett leeres Brett
+
+    // Weißer Turm auf a1
+    Turm wT; wT.Set_Name('T'); wT.Set_Farbe(true); wT.Set_Wahrscheinlichkeit(1.0f);
+    Spielfeld.Felder[0][0] = &wT; wT.Set_Spalte(1); wT.Set_Zeile(1);
+
+    // Schwarzer Bauer auf a3 (50%)
+    Bauer sB; sB.Set_Name('b'); sB.Set_Farbe(false); sB.Set_Wahrscheinlichkeit(0.5f); sB.Add_Same_Piece_S(2); sB.Add_Same_Piece_Z(3); // (Fake-Verlinkung zu b3)
+    Spielfeld.Felder[0][2] = &sB; sB.Set_Spalte(1); sB.Set_Zeile(3);
+
+    // Weißer Turm berechnet seine möglichen Felder
+    wT.Set_Moegliche_Felder(Spielfeld);
+    vector<Moegliches_Feld> felder = wT.Get_Moegliche_Felder();
+
+    // Suche das Feld a4 (direkt HINTER der 50%-Blockade)
+    bool a4_gefunden = false;
+    float a4_wahrscheinlichkeit = 0.0f;
+    for (int i = 0; i < felder.size(); i++) {
+        if (felder[i].spalte == 1 && felder[i].zeile == 4) {
+            a4_gefunden = true;
+            a4_wahrscheinlichkeit = felder[i].wahrscheinlichkeit;
+            break;
+        }
+    }
+
+    // Wenn der Turm auf a4 zieht, sollte er dort nur noch mit 50% Wahrscheinlichkeit ankommen (da er zu 50% auf a3 geblockt wird)
+    PrintResult(a4_gefunden && a4_wahrscheinlichkeit == 0.5f, "Der Turm durfte entweder nicht durch den 50%-Geist ziehen, oder seine Wahrscheinlichkeit dahinter wurde nicht auf 50% reduziert.");
+}
+void Test_4_5_Kollaps_Nullpointer_Crash() {
+    cout << "Test 4.5: Kollaps Nullpointer Crash (Geloeschte Geister)... ";
+    Brett Spielfeld; vector<Bauer> b; vector<Springer> s; vector<Laeufer> l; vector<Turm> t; vector<Dame> d; vector<Koenig> k;
+    Setup_Test_Board(Spielfeld, b, s, l, t, d, k);
+
+    // 1. Weißen Springer (g1) splitten nach f3 und h3
+    Logik_Split(7, 1, Spielfeld, b, s, l, t, d, k); // Springer wählen
+    Logik_Split(6, 3, Spielfeld, b, s, l, t, d, k); // Ziel 1: f3
+    Logik_Split(8, 3, Spielfeld, b, s, l, t, d, k); // Ziel 2: h3
+
+    Figuren* springer_f3 = Spielfeld.Felder[5][2];
+    Figuren* springer_h3 = Spielfeld.Felder[7][2];
+
+    // 2. Wir simulieren den Fehlerzustand: 
+    // Der Springer auf h3 wurde durch irgendetwas (z.B. ein vorheriges Schlagen) vom Brett gelöscht.
+    // Aber die `same_piece` Liste vom Springer auf f3 weiß davon nichts!
+    springer_h3->Set_Geschlagen(true);
+    Spielfeld.Felder[7][2] = nullptr;
+
+    // 3. Wir zwingen die Messung() auf f3, fehlzuschlagen (0% Wahrscheinlichkeit).
+    // Dadurch MUSS das Spiel in der same_piece Liste nach dem Zwilling auf h3 suchen und Kollaps() aufrufen.
+    springer_f3->Set_Wahrscheinlichkeit(0.0f);
+
+    // 4. Der Moment der Wahrheit: Aufruf der Messung
+    // Ohne den Bugfix würde das Spiel in exakt dieser Zeile komplett abstürzen (schließen)!
+    Messung(6, 3, Spielfeld);
+
+    // 5. Überprüfung
+    // Wenn das Programm diese Zeile erreicht, ohne abzustürzen, hat dein Sicherheits-Check funktioniert!
+    PrintResult(true, "Das Spiel ist abgestuerzt!");
+}
+
+// ==========================================
+// TEST RUNNER HAUPTFUNKTION
+// ==========================================
+void RunAllTests() {
+    cout << "========================================" << endl;
+    cout << "   STARTE QUANTUM CHESS TEST SUITE      " << endl;
+    cout << "========================================" << endl;
+
+    Test_1_1_NormalerZug();
+    Test_1_2_Blockade();
+    Test_1_3_Schlagen();
+
+    Test_2_1_EnPassant();
+
+    Test_3_1_SplitMove();
+    Test_3_3_MergeMove();
+
+    Test_4_1_Bauernumwandlung();
+    Test_4_2_Rochade();
+    Test_4_3_Quanten_Kollaps();
+    Test_4_4_Geister_Blockade();
+	Test_4_5_Kollaps_Nullpointer_Crash();
+
+    cout << "========================================" << endl;
+    cout << "             TESTS BEENDET              " << endl;
+    cout << "========================================" << endl;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 int main() {
     // init SDL
+    RunAllTests();
+
+
     void* appstate = nullptr;
     Window_Configuration WindowConfigs;
 

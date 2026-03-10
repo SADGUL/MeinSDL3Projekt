@@ -126,10 +126,9 @@ void Figuren::Add_Connected_Piece(Figuren* F) {
 		connected_piece.push_back(F);
 	}
 }
-void Figuren::Replace_Connected_Piece(int i, Figuren F) {
-	Figuren* Fptr = &F;
-	if (Fptr != nullptr) {
-		connected_piece[i] = Fptr;
+void Figuren::Replace_Connected_Piece(int i, Figuren* F) {
+	if (F != nullptr) {
+		connected_piece[i] = F;
 	}
 }
 void Figuren::Clear_Connected_Piece() {

@@ -37,7 +37,7 @@ void Kollaps(int s, int z, Brett& spielfeld);
 void Feld_Leeren(int s, int z, Brett& spielfeld);
 
 void Messung_Fuer_Verschraenkung(Figuren* F, Brett& spielfeld);
-void Kollpas_Verschraenkung(int s, int z, Brett& spielfeld);
+void Kollaps_Verschraenkung(int s, int z, Brett& spielfeld);
 void Check_For_Kollaps_Verschraenkung( Brett& spielfeld);
 
 void Create_Bauer(int su, int zu, int sn, int zn, float p, vector <Bauer>& bauern, Brett& spielfeld);
