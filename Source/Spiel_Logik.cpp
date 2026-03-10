@@ -560,9 +560,9 @@ void Logik_Merge(int s, int z, Brett& spielfeld) {
 		moegliche_felder_2 = spielfeld.Felder[sa2 - 1][za2 - 1]->Get_Moegliche_Felder();
 
 		for (int i = 0; i < moegliche_felder_1.size(); i++) {
-			if (moegliche_felder_1[i].spalte == s && moegliche_felder_1[i].zeile == z, moegliche_felder_1[i].wahrscheinlichkeit == 1.0){
+			if (moegliche_felder_1[i].spalte == s && moegliche_felder_1[i].zeile == z && moegliche_felder_1[i].wahrscheinlichkeit == 1.0) {
 				for (int j = 0; j < moegliche_felder_2.size(); j++) {
-					if (moegliche_felder_2[j].spalte == s && moegliche_felder_2[j].zeile == z, moegliche_felder_2[i].wahrscheinlichkeit == 1.0) { // ausgewaehltes Feld muss von beiden Figuren ein moegliches Feld sein
+					if (moegliche_felder_2[j].spalte == s && moegliche_felder_2[j].zeile == z && moegliche_felder_2[j].wahrscheinlichkeit == 1.0) {
 						Merge_Move(s, z, spielfeld);
 						break;
 					}
@@ -584,23 +584,32 @@ void Merge_Move(int sz, int zz, Brett& spielfeld) {
 	int s2 = spielfeld.second_piece_s;
 	int z2 = spielfeld.second_piece_z;
 
-	if (spielfeld.Felder[sz - 1][zz - 1] == nullptr) {
-
-		spielfeld.Felder[sz - 1][zz - 1] = spielfeld.Felder[sa - 1][za - 1];
-		spielfeld.Felder[sz - 1][zz - 1]->Set_Spalte(sz);
-		spielfeld.Felder[sz - 1][zz - 1]->Set_Zeile(zz);
-		spielfeld.Felder[sz - 1][zz - 1]->Set_Gezogen(true);
-		spielfeld.Felder[sz - 1][zz - 1]->Set_Wahrscheinlichkeit(spielfeld.Felder[sa - 1][za - 1]->Get_Wahrscheinlichkeit() + spielfeld.Felder[s2 - 1][z2 - 1]->Get_Wahrscheinlichkeit());
-		spielfeld.Felder[sa - 1][za - 1] = nullptr;
-		cout << "Figuren gemerged" << endl;
-
-		// Zweite ausgewaehlte Figur auf geschlagen setzen und verschwinden lassen
-		spielfeld.Felder[s2 - 1][z2 - 1]->Set_Geschlagen(true);
-		spielfeld.Felder[s2 - 1][z2 - 1] = nullptr;
-
-		spielfeld.whites_turn = !spielfeld.whites_turn;
+	// NEU: Wenn eine gegnerische Figur auf dem Zielfeld steht, schlage sie!
+	if (spielfeld.Felder[sz - 1][zz - 1] != nullptr) {
+		Messung(sz, zz, spielfeld); // Kollaps der Zielfigur erzwingen (falls es eine Quanten-Figur ist)
+		Feld_Leeren(sz, zz, spielfeld); // Gegnerische Figur vom Brett nehmen
 	}
-	
+
+	// Die gemergte Figur auf das nun freie Zielfeld setzen
+	spielfeld.Felder[sz - 1][zz - 1] = spielfeld.Felder[sa - 1][za - 1];
+	spielfeld.Felder[sz - 1][zz - 1]->Set_Spalte(sz);
+	spielfeld.Felder[sz - 1][zz - 1]->Set_Zeile(zz);
+	spielfeld.Felder[sz - 1][zz - 1]->Set_Gezogen(true);
+
+	// Wahrscheinlichkeiten addieren (ergibt 1.0)
+	spielfeld.Felder[sz - 1][zz - 1]->Set_Wahrscheinlichkeit(
+		spielfeld.Felder[sa - 1][za - 1]->Get_Wahrscheinlichkeit() +
+		spielfeld.Felder[s2 - 1][z2 - 1]->Get_Wahrscheinlichkeit()
+	);
+
+	spielfeld.Felder[sa - 1][za - 1] = nullptr;
+	cout << "Figuren gemerged und Zug ausgefuehrt!" << endl;
+
+	// Zweite ausgewaehlte Teil-Figur auf geschlagen setzen und verschwinden lassen
+	spielfeld.Felder[s2 - 1][z2 - 1]->Set_Geschlagen(true);
+	spielfeld.Felder[s2 - 1][z2 - 1] = nullptr;
+
+	spielfeld.whites_turn = !spielfeld.whites_turn;
 }
 
 void No_Move(Brett& spielfeld) {

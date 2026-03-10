@@ -786,32 +786,37 @@ int main() {
             }
 
             // ONLY EXECUTE IF A CLICK OCCURRED
+            // ONLY EXECUTE IF A CLICK OCCURRED
             if (newClick && !Spielfeld.schachmatt) {
-                if (Button_Texture.normal_move && !Button_Texture.split_move && !Button_Texture.merge_move) {
-                    Logik_normal(selectedCol, selectedRow, Spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
-                }
-                else if (!Button_Texture.normal_move && Button_Texture.split_move && !Button_Texture.merge_move) {
-                    Logik_Split(selectedCol, selectedRow, Spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
-                }
-                else if (!Button_Texture.normal_move && !Button_Texture.split_move && Button_Texture.merge_move) {
-                    Logik_Merge(selectedCol, selectedRow, Spielfeld);
-                }
-                else {
-                    No_Move(Spielfeld);
-                }
 
-                if (Check_For_Promotion(Spielfeld, damen)) {
-                    createTexture(appstate, Spielfeld);
-                }
-                Check_For_Kollaps_Verschraenkung(Spielfeld);
+                // 1. FIX: Züge nur ausführen, wenn die Maus auf dem Schachbrett war! (Verhindert Sidebar-Crash)
+                if (mouseX <= Game_Layout.boardSize) {
 
-                // ==========================================
-                // CHECK FOR MATE IMMEDIATELY AFTER COLLAPSE
-                // ==========================================
-                Check_for_Mate(Spielfeld);
+                    if (Button_Texture.normal_move && !Button_Texture.split_move && !Button_Texture.merge_move) {
+                        Logik_normal(selectedCol, selectedRow, Spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
+                    }
+                    else if (!Button_Texture.normal_move && Button_Texture.split_move && !Button_Texture.merge_move) {
+                        Logik_Split(selectedCol, selectedRow, Spielfeld, bauern, springer, laeufer, tuerme, damen, koenige);
+                    }
+                    else if (!Button_Texture.normal_move && !Button_Texture.split_move && Button_Texture.merge_move) {
+                        Logik_Merge(selectedCol, selectedRow, Spielfeld);
+                    }
+                    else {
+                        No_Move(Spielfeld);
+                    }
 
-                cout << "Ausgewaehlte Reihe: " << selectedRow << endl;
-                cout << "Ausgewaehlte Spalte: " << selectedCol << endl;
+                    if (Check_For_Promotion(Spielfeld, damen)) {
+                        createTexture(appstate, Spielfeld);
+                    }
+                    Check_For_Kollaps_Verschraenkung(Spielfeld);
+
+                    // CHECK FOR MATE IMMEDIATELY AFTER COLLAPSE
+                    Check_for_Mate(Spielfeld);
+
+                    cout << "Ausgewaehlte Reihe: " << selectedRow << endl;
+                    cout << "Ausgewaehlte Spalte: " << selectedCol << endl;
+
+                } // <-- ENDE der if-Abfrage für das Schachbrett
 
                 // ==========================================
                 // WINNER POPUP ANNOUNCEMENT
@@ -819,18 +824,38 @@ int main() {
                 if (Spielfeld.schachmatt) {
                     const char* winnerText = Spielfeld.whites_turn ? "Black wins by Checkmate!" : "White wins by Checkmate!";
                     auto* state = static_cast<AppState*>(appstate);
-
-                    // The game pauses right here until the player closes the pop-up
                     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Game Over!", winnerText, state->window);
-
-                    // Break out of the while(true) loop to trigger AppQuit and close the game!
                     break;
                 }
                 // ==========================================
 
+                // 2. FIX: Visuelles Feedback (inkl. Schnittmenge für den Merge-Move)
                 if (Spielfeld.piece_selected) {
                     Spielfeld.Felder[Spielfeld.selected_piece_s - 1][Spielfeld.selected_piece_z - 1]->Set_Moegliche_Felder(Spielfeld);
                     Vector_Moegliche_felder = Spielfeld.Felder[Spielfeld.selected_piece_s - 1][Spielfeld.selected_piece_z - 1]->Get_Moegliche_Felder();
+
+                    if (Button_Texture.merge_move && Spielfeld.first_piece_selected && Spielfeld.second_piece_selected) {
+
+                        // Felder der zuerst angeklickten Figur laden
+                        Spielfeld.Felder[Spielfeld.first_piece_s - 1][Spielfeld.first_piece_z - 1]->Set_Moegliche_Felder(Spielfeld);
+                        vector<Moegliches_Feld> mf1 = Spielfeld.Felder[Spielfeld.first_piece_s - 1][Spielfeld.first_piece_z - 1]->Get_Moegliche_Felder();
+                        vector<Moegliches_Feld> schnittmenge;
+
+                        // Vergleichen und nur ueberlappende 100%-Felder uebernehmen
+                        for (int i = 0; i < Vector_Moegliche_felder.size(); i++) {
+                            for (int j = 0; j < mf1.size(); j++) {
+                                if (Vector_Moegliche_felder[i].spalte == mf1[j].spalte &&
+                                    Vector_Moegliche_felder[i].zeile == mf1[j].zeile &&
+                                    Vector_Moegliche_felder[i].wahrscheinlichkeit == 1.0f &&
+                                    mf1[j].wahrscheinlichkeit == 1.0f) {
+
+                                    schnittmenge.push_back(Vector_Moegliche_felder[i]);
+                                    break;
+                                }
+                            }
+                        }
+                        Vector_Moegliche_felder = schnittmenge;
+                    }
                 }
                 else {
                     Vector_Moegliche_felder.clear();

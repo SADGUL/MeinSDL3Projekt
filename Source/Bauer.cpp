@@ -116,7 +116,7 @@ void Bauer::Set_Moegliche_Felder(Brett& spielfeld) {
 
 				if (spielfeld.Felder[spalte + s - 1][zeile + z - 1] != nullptr) {
 
-					if (spielfeld.Felder[spalte + s - 1][zeile + z - 1]->Get_Farbe() != weiss || spielfeld.Felder[spalte + s - 1][zeile + z - 1]->Get_Wahrscheinlichkeit() != 1.0) {
+					if (spielfeld.Felder[spalte + s - 1][zeile + z - 1]->Get_Farbe() != weiss) {
 
 						F.spalte = spalte + s;
 						F.zeile = zeile + z;
