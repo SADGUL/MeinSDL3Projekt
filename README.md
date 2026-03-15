@@ -52,4 +52,4 @@ Dank dynamischer Pfade und automatischer Post-Build-Skripte lässt sich das Spie
 ### Schritt 1: Repository herunterladen
 Klone das Repository über Git in dein gewünschtes Verzeichnis:
 ```bash
-git clone [https://github.com/DEIN_GITHUB_NAME/Quantenschach.git](https://github.com/DEIN_GITHUB_NAME/Quantenschach.git)
+git clone [https://github.com/SADGUL/Quantenschach.git](https://github.com/SADGUL/Quantenschach.git)
