@@ -51,5 +51,23 @@ Dank dynamischer Pfade und automatischer Post-Build-Skripte lässt sich das Spie
 
 ### Schritt 1: Repository herunterladen
 Klone das Repository über Git in dein gewünschtes Verzeichnis:
-```bash
-git clone [https://github.com/SADGUL/Quantenschach.git](https://github.com/SADGUL/Quantenschach.git)
+`git clone https://github.com/SADGUL/Quantenschach.git`
+
+(Alternativ: Klicke oben auf GitHub auf den grünen Button `<> Code` und wähle `Download ZIP`, entpacke den Ordner danach auf deinem PC).
+
+### Schritt 2: In Visual Studio öffnen
+Öffne den heruntergeladenen Ordner und mache einen Doppelklick auf die Datei `Quantenschach.sln`. Visual Studio öffnet das Projekt automatisch.
+
+### Schritt 3: Bauen und Spielen
+1. Stelle sicher, dass in Visual Studio oben in der Werkzeugleiste **x64** (und z. B. **Debug**) als Plattform ausgewählt ist.
+2. Drücke einfach **F5** auf deiner Tastatur (oder klicke oben auf den grünen Play-Button "Lokaler Windows-Debugger").
+
+Visual Studio wird den C++ Code nun kompilieren. Ein automatisiertes Hintergrund-Skript kopiert danach selbstständig die benötigte `SDL3.dll` und den Grafikordner (`Png`) in das fertige Ausgabe-Verzeichnis. Das Spiel startet sofort!
+
+---
+
+## 🔬 Technische Details für Entwickler
+* **Grafik:** SDL3 (`SDL3-3.2.14` ist direkt eingebunden).
+* **Texturen:** Das Laden der `.png`-Dateien erfolgt leichtgewichtig über `stb_image.h` (keine zusätzlichen DLLs für Bilder nötig).
+* **Automatisierung:** Die Visual Studio Projekteigenschaften nutzen Makros (`$(SolutionDir)` und `$(OutDir)`), um Abhängigkeiten unabhängig vom PC-Setup immer fehlerfrei zu verlinken und nach dem Build zu kopieren.
+* **Logik-Tests:** Beim Start der Engine läuft automatisch eine unsichtbare Suite an Unittests durch die Konsole, um sicherzustellen, dass die Quantenregeln (Kollaps, Verschränkung) mathematisch korrekt arbeiten, bevor das Fenster öffnet.
