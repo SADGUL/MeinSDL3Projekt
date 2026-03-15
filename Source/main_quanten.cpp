@@ -3,7 +3,6 @@
 #include "../Header/Brett.h"
 #include <iostream>
 #include <SDL3/SDL.h>
-#include <SDL3_image/SDL_image.h>
 #include "../Header/Spiel_Logik.h"
 #include <string>
 #include <vector>
