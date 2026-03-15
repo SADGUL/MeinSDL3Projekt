@@ -63,11 +63,3 @@ Klone das Repository über Git in dein gewünschtes Verzeichnis:
 2. Drücke einfach **F5** auf deiner Tastatur (oder klicke oben auf den grünen Play-Button "Lokaler Windows-Debugger").
 
 Visual Studio wird den C++ Code nun kompilieren. Ein automatisiertes Hintergrund-Skript kopiert danach selbstständig die benötigte `SDL3.dll` und den Grafikordner (`Png`) in das fertige Ausgabe-Verzeichnis. Das Spiel startet sofort!
-
----
-
-## 🔬 Technische Details für Entwickler
-* **Grafik:** SDL3 (`SDL3-3.2.14` ist direkt eingebunden).
-* **Texturen:** Das Laden der `.png`-Dateien erfolgt leichtgewichtig über `stb_image.h` (keine zusätzlichen DLLs für Bilder nötig).
-* **Automatisierung:** Die Visual Studio Projekteigenschaften nutzen Makros (`$(SolutionDir)` und `$(OutDir)`), um Abhängigkeiten unabhängig vom PC-Setup immer fehlerfrei zu verlinken und nach dem Build zu kopieren.
-* **Logik-Tests:** Beim Start der Engine läuft automatisch eine unsichtbare Suite an Unittests durch die Konsole, um sicherzustellen, dass die Quantenregeln (Kollaps, Verschränkung) mathematisch korrekt arbeiten, bevor das Fenster öffnet.
