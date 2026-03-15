@@ -1,67 +1,55 @@
-Markdown
-# Quantum Chess ♟️🌌
+# Quantenschach ♟️🌌
 
-A C++ implementation of a chess variant that introduces quantum mechanics into the classic game. Built with **SDL3** for rendering, this project features superposition, quantum entanglement, and wave-function collapse upon measurement (capturing).
+Willkommen bei **Quantenschach**! Dies ist eine in C++ entwickelte Schachvariante, die das klassische Brettspiel um faszinierende Konzepte der Quantenmechanik erweitert. Entwickelt mit **SDL3** für das grafische Rendering.
 
-## 🌟 Features
+In diesem Spiel gelten die normalen Schachregeln, aber Figuren können sich zusätzlich in einer **Superposition** (Überlagerung) befinden, sich mit anderen Figuren **verschränken** und durch Angriffe zu einer festen Realität **kollabieren**.
 
-* **Classic Chess Mechanics:** Fully functional standard rules including En Passant, Castling, and Pawn Promotion.
-* **Quantum Split Move:** Place a piece into a superposition across two different target squares (50/50 probability).
-* **Quantum Merge Move:** Recombine a split piece from two separate squares onto a single target square, creating interference.
-* **Quantum Entanglement & Collapse:** Moving pieces through "ghost" pieces (pieces in superposition) creates path entanglement. Attempting to capture a quantum piece forces a "measurement," collapsing the wave function into a definitive 100% or 0% state across the board.
-* **Built-in Test Suite:** The engine automatically runs a suite of logical tests (standard moves, split/merge logic, Schrödinger's cat scenarios) on startup to ensure quantum rules are behaving correctly.
-* **Networking (WIP):** Includes foundational TCP client/server network logic for future multiplayer support via Winsock.
+---
 
-## 📁 Repository Structure
+## 🌟 Die Quanten-Regeln (Spielanleitung)
 
-* `/Source/` - Contains all `.cpp` source files (Game logic, piece movements, network logic).
-* `/Header/` - Contains all corresponding `.h` header files.
-* `/Png/` - Image assets for the chessboard and pieces.
-* `MeinSDL3Projekt.sln` - The Visual Studio Solution file for easy building.
-* `SDL3_image.dll` - Required dynamic link library for rendering image textures.
+Das Spielbrett verfügt auf der rechten Seite über eine Steuerungsleiste mit drei Buttons, um die Art deines Zuges auszuwählen:
 
-## 🛠️ Prerequisites
+### 1. ➡️ Normaler Zug (Normal Move)
+Funktioniert wie im klassischen Schach. 
+* Wähle den obersten Button (einfacher Pfeil).
+* Klicke auf deine Figur und danach auf ein grün markiertes Zielfeld.
 
-To compile and run this project, you will need:
-* **Windows OS** (The networking relies on `<winsock2.h>`).
-* **Visual Studio 2022** (Recommended, with the "Desktop development with C++" workload installed).
-* **SDL3 and SDL3_image** libraries.
+### 2. 🔀 Quanten-Split (Split Move)
+Bringe eine Figur in eine Superposition. Sie existiert danach an zwei Orten gleichzeitig (jeweils zu 50 % Wahrscheinlichkeit).
+* Wähle den mittleren Button (Gabelung).
+* Klicke auf deine Figur.
+* Klicke auf das **erste** gewünschte Zielfeld.
+* Klicke auf das **zweite** gewünschte Zielfeld. 
+*(Hinweis: Bauern können keine Quantenzüge ausführen!)*
 
-## 🚀 How to Compile and Run
+### 3. ⏪ Quanten-Merge (Merge Move)
+Füge eine zuvor gesplittete Figur (zwei 50%-Hälften) wieder zu einer 100%-Figur zusammen.
+* Wähle den untersten Button (Zusammenführung).
+* Klicke auf die **erste** 50%-Hälfte deiner Figur.
+* Klicke auf die **zweite** 50%-Hälfte deiner Figur.
+* Klicke auf das gemeinsame **Zielfeld**, auf dem sie sich vereinen sollen.
 
-### Method 1: Using Visual Studio (Recommended)
+### 💥 Messung und Kollaps (Schrödingers Katze)
+Wenn eine Figur in Superposition (50%) angegriffen wird oder eine andere Figur durch sie hindurchziehen will, kommt es zu einer **Messung**. Das Spiel berechnet in diesem Moment den Zufall: Die Wahrscheinlichkeitswelle kollabiert. Die Figur ist dann entweder zu 100 % auf dem angegriffenen Feld (und wird geschlagen) oder sie verschwindet dort (0 %) und materialisiert sich zu 100 % auf ihrem anderen Superpositions-Feld!
 
-Since the repository already contains a Visual Studio Solution (`MeinSDL3Projekt.sln`), this is the easiest way to compile the game.
+---
 
-1.  **Clone the repository** to your local machine.
-2.  **Open the Solution:** Double-click `MeinSDL3Projekt.sln` to open it in Visual Studio.
-3.  **Check Dependencies:** * Ensure the `SDL3_image-3.4.0` folder is correctly referenced in your project's Include and Library directories (Right-click Project -> Properties -> VC++ Directories).
-    * Ensure `ws2_32.lib` is linked for the networking capabilities (Right-click Project -> Properties -> Linker -> Input -> Additional Dependencies).
-4.  **Build and Run:** Select `x64` as your platform target at the top of the IDE. Press `F5` (or click "Local Windows Debugger") to compile and launch the game. 
+## 🛠️ Voraussetzungen
 
-*Note: Make sure `SDL3_image.dll` and the `/Png/` folder are located in the same directory as the compiled `.exe` (usually the `x64/Debug` or `x64/Release` folder), or your working directory is set to the project root.*
+Dieses Projekt ist extrem einsteigerfreundlich konfiguriert. **Alle benötigten Bibliotheken (SDL3, stb_image) und Grafiken sind bereits im Repository enthalten.** Du musst nichts extra herunterladen!
 
-### Method 2: Manual Compilation via Command Line (g++ / MinGW)
+Du benötigst lediglich:
+* **Windows 10 oder 11**
+* **Visual Studio 2022** (mit der installierten Workload *"Desktopentwicklung mit C++"*)
 
-If you prefer using the command line, you will need to link SDL3, SDL3_image, and Winsock manually. Open your terminal in the `Source` folder (or wherever the `.cpp` files are located) and run:
+---
 
+## 🚀 Klonen & Starten (In 3 einfachen Schritten)
+
+Dank dynamischer Pfade und automatischer Post-Build-Skripte lässt sich das Spiel "Out-of-the-Box" kompilieren und starten.
+
+### Schritt 1: Repository herunterladen
+Klone das Repository über Git in dein gewünschtes Verzeichnis:
 ```bash
-g++ -std=c++17 -I../Header -I../SDL3_image-3.4.0/include *.cpp -o QuantumChess.exe -L../SDL3_image-3.4.0/lib -lSDL3 -lSDL3_image -lws2_32
-Adjust the -I (Include) and -L (Library) paths depending on exactly where your SDL3 installation is located relative to the source files.
-
-Run the resulting executable:
-
-Bash
-./QuantumChess.exe
-🎮 How to Play
-Upon launching, the game will first print the results of the logical test suite to the console. If all tests pass, the graphical SDL window will appear.
-
-Use the interactive sidebar buttons on the right side of the screen to select your move type:
-
-Normal Move: Click a piece, then click a valid highlighted square to move normally.
-
-Split Move: Click a piece, select your first target square, then select your second target square. The piece will split into a 50/50 superposition.
-
-Merge Move: Click the first half of a split piece, click the second half, and finally click the target square you want them to merge onto.
-
-Check the console window during gameplay for detailed logs regarding quantum collapses, entanglements, and move validations.
+git clone [https://github.com/DEIN_GITHUB_NAME/Quantenschach.git](https://github.com/DEIN_GITHUB_NAME/Quantenschach.git)
